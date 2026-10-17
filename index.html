@@ -106,10 +106,9 @@
 <section id="tab-settings" class="space-y-4 pb-6" hidden>
   <!-- Cover & Avatar Profile Header (Gaya Profil WA/Medsos) -->
   <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-    <!-- Banner / Sampul Atas -->
-    <div class="h-32 bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 relative overflow-hidden">
-      <!-- Jika ingin banner bisa di-upload foto juga nanti, bisa pakai background image -->
-      <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    <!-- Banner / Sampul Atas (Dinamis dari Cloudinary) -->
+    <div id="view-cover-banner" class="h-36 bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 bg-cover bg-center relative">
+      <div class="absolute inset-0 bg-black/20"></div>
     </div>
 
     <!-- Container Foto Profil & Nama -->
@@ -117,27 +116,25 @@
       <!-- Foto Profil Bulat Menimpa Banner -->
       <div class="relative -mt-12 mb-3">
         <img id="view-profile-avatar" src="public/icon-192.png" alt="Avatar Terapis" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md bg-white">
-        <!-- Tombol Edit kecil di foto -->
-        <button type="button" id="edit-profile-btn-icon" class="absolute bottom-0 right-0 bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs shadow hover:bg-emerald-700 transition" onclick="document.getElementById('edit-profile-btn').click()">
-          <i class="fa-solid fa-pen"></i>
+        <button type="button" class="absolute bottom-0 right-0 bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs shadow hover:bg-emerald-700 transition" onclick="document.getElementById('edit-profile-btn').click()">
+          <i class="fa-solid fa-camera"></i>
         </button>
       </div>
 
       <!-- Nama & Gelar -->
-      <h3 id="view-therapist-name" class="font-bold text-lg text-gray-900 leading-tight">Ahmad Rokhmani</h3>
+      <h3 id="view-therapist-name" class="font-bold text-xl text-gray-900 leading-tight">Kang IKHWAN</h3>
       <p id="view-clinic-name" class="text-xs font-semibold text-emerald-600 mt-0.5">Klinik Rumah Sehat</p>
-      <p id="view-license" class="text-[11px] text-gray-400 mt-1"><i class="fa-solid fa-id-card"></i> Izin: Belum Diisi</p>
+      <p id="view-license" class="text-[11px] text-gray-400 mt-1"><i class="fa-solid fa-id-card"></i> STPT/123/2026</p>
 
       <!-- Tombol Edit Profil Lengkap -->
       <button id="edit-profile-btn" class="mt-4 w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
-        <i class="fa-solid fa-pen-to-square"></i> Edit Profil Lengkap
+        <i class="fa-solid fa-pen-to-square"></i> Edit Profil &amp; Foto Sampul
       </button>
     </div>
   </div>
 
-  <!-- Kotak Informasi Detail & Keahlian -->
+  <!-- Detail Informasi & Keahlian -->
   <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-4 text-xs">
-    <!-- Tentang / Keahlian -->
     <div>
       <span class="font-semibold text-gray-400 uppercase tracking-wider block mb-2">Keahlian &amp; Spesialisasi</span>
       <div id="view-skills-container" class="flex flex-wrap gap-1.5">
@@ -145,7 +142,6 @@
       </div>
     </div>
 
-    <!-- Kontak & Alamat -->
     <div class="space-y-2.5 pt-3 border-t border-gray-100 text-gray-600">
       <div class="flex items-start space-x-2.5">
         <i class="fa-solid fa-location-dot text-emerald-600 mt-0.5 w-4"></i>
@@ -163,10 +159,19 @@
         <i class="fa-brands fa-facebook text-blue-600 w-4"></i>
         <span id="view-facebook">-</span>
       </div>
-      <div id="view-extra-socials" class="space-y-2 pt-1">
-        <!-- Extra socials dynamic -->
-      </div>
+      <div id="view-extra-socials" class="space-y-2 pt-1"></div>
     </div>
+  </div>
+
+  <!-- Kredit Khusus Pembuat / Developer -->
+  <div class="bg-emerald-900 text-white rounded-2xl p-4 text-center space-y-2 shadow-sm">
+    <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto text-emerald-300 text-lg">
+      <i class="fa-solid fa-code"></i>
+    </div>
+    <b class="text-xs text-emerald-200 block uppercase tracking-wider">Apresiasi Pengembang</b>
+    <p class="text-xs text-emerald-100 leading-relaxed font-medium">
+      Aplikasi ini dibuat khusus oleh <span class="text-amber-300 font-bold">Ahmad Rokhmani</span> untuk <span class="text-white font-bold">Kang IKHWAN</span>.
+    </p>
   </div>
 </section>
 </main>
