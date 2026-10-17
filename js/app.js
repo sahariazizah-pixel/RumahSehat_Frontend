@@ -34,13 +34,26 @@ export function message(s) {
   window.toastTimer = setTimeout(() => toast.classList.add("opacity-0"), 2500);
 }
 
-// Robust Event Delegation for all [data-tab] elements (bottom nav & quick cards)
-document.addEventListener("click", (e) => {
-  const target = e.target.closest("[data-tab]");
-  if (target && target.dataset.tab) {
-    showTab(target.dataset.tab);
-  }
-});
+// Expose to window for inline handlers or global debugging
+window.showTab = showTab;
+window.message = message;
+
+// Robust Event Delegation for all [data-tab] elements
+function initNavigation() {
+  document.addEventListener("click", (e) => {
+    const target = e.target.closest("[data-tab]");
+    if (target && target.dataset.tab) {
+      e.preventDefault();
+      showTab(target.dataset.tab);
+    }
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initNavigation);
+} else {
+  initNavigation();
+}
 
 // Initial startup load
 loadProfile();
