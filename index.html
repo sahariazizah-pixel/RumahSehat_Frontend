@@ -1036,8 +1036,13 @@
       } catch(e) { console.error(e); }
     }
 
-    if(!botToken || !chatId){
-      message("Isi Token & Chat ID terlebih dahulu");
+    if(!botToken){
+      message("Telegram Bot Token belum diisi.");
+      return false;
+    }
+
+    if(!chatId){
+      message("Telegram Chat ID belum diisi.");
       return false;
     }
 
