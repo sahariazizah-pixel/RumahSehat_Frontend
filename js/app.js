@@ -1,60 +1,52 @@
-import { loadProfile, loadCategories } from "./profile.js";
-import { loadAtlas } from "./atlas.js";
-import { loadPatients } from "./patients.js";
+// js/app.js
 
 const tabIds = ["home", "atlas", "patients", "settings"];
 
-export function showTab(id) {
+// Definisikan showTab secara global agar bisa diakses darimana saja
+window.showTab = function(id) {
   tabIds.forEach(t => {
-    const el = document.getElementById("tab-" + t);
-    if(el) el.hidden = t !== id;
-  });
-  document.querySelectorAll(".nav-item").forEach(b => {
-    const active = b.dataset.tab === id;
-    b.classList.toggle("text-emerald-600", active);
-    b.classList.toggle("text-gray-400", !active);
-    if(active) b.setAttribute("aria-current", "page");
-    else b.removeAttribute("aria-current");
-  });
-  if(id === "atlas") loadAtlas();
-  if(id === "patients") loadPatients();
-  if(id === "settings") {
-    loadProfile();
-    loadCategories();
-  }
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-export function message(s) {
-  const toast = document.getElementById("toast");
-  if(!toast) return;
-  toast.textContent = s;
-  toast.classList.remove("opacity-0");
-  clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => toast.classList.add("opacity-0"), 2500);
-}
-
-// Expose to window for inline handlers or global debugging
-window.showTab = showTab;
-window.message = message;
-
-// Robust Event Delegation for all [data-tab] elements
-function initNavigation() {
-  document.addEventListener("click", (e) => {
-    const target = e.target.closest("[data-tab]");
-    if (target && target.dataset.tab) {
-      e.preventDefault();
-      showTab(target.dataset.tab);
+    const section = document.getElementById("tab-" + t);
+    if (section) {
+      if (t === id) {
+        section.removeAttribute("hidden");
+      } else {
+        section.setAttribute("hidden", "true");
+      }
     }
   });
-}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initNavigation);
-} else {
-  initNavigation();
-}
+  // Atur status aktif pada tombol navigasi bawah
+  document.querySelectorAll(".nav-item").forEach(b => {
+    const active = (b.dataset.tab === id);
+    if (active) {
+      b.classList.add("text-emerald-600");
+      b.classList.remove("text-gray-400");
+      b.setAttribute("aria-current", "page");
+    } else {
+      b.classList.remove("text-emerald-600");
+      b.classList.add("text-gray-400");
+      b.removeAttribute("aria-current");
+    }
+  });
 
-// Initial startup load
-loadProfile();
-loadCategories();
+  // Panggil fungsi pemuat data khusus tab
+  if (id === "atlas" && typeof window.loadAtlas === "function") {
+    window.loadAtlas();
+  }
+  if (id === "settings" && typeof window.loadProfile === "function") {
+    window.loadProfile();
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// Gunakan Event Delegation global untuk menangkap klik pada semua atribut [data-tab]
+document.addEventListener("click", (e) => {
+  const trigger = e.target.closest("[data-tab]");
+  if (trigger) {
+    const targetTab = trigger.dataset.tab;
+    if (targetTab) {
+      window.showTab(targetTab);
+    }
+  }
+});
