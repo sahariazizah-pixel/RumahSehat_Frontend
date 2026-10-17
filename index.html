@@ -15,7 +15,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; color: #0f172a; }
+  /* Make text darker and larger for users with vision correction */
+  .text-gray-400, .text-gray-500, .text-gray-600 { color: #1e293b !important; font-weight: 500; }
+  .text-gray-700 { color: #0f172a !important; font-weight: 600; }
+  .text-[10px], .text-[11px], .text-xs { font-size: 13px !important; line-height: 1.5 !important; }
+  .text-sm { font-size: 14.5px !important; }
+  input, select, textarea { font-size: 14px !important; color: #0f172a !important; font-weight: 500; }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased selection:bg-emerald-500 selection:text-white pb-24">
@@ -338,6 +344,28 @@
   <div class="flex justify-end space-x-2 pt-2">
     <button type="button" id="cancel-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
     <button type="submit" id="submit-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
+  </div>
+</form>
+</dialog>
+
+<!-- DIALOG KATEGORI -->
+<dialog id="category-dialog" class="p-0 rounded-2xl shadow-2xl max-w-sm w-11/12 backdrop:bg-black/50">
+<form id="category-form" class="p-5 space-y-3 bg-white">
+  <div class="flex justify-between items-start pb-2 border-b border-gray-100">
+    <div>
+      <h2 id="category-dialog-title" class="font-bold text-base text-gray-800">Tambah Kategori</h2>
+      <p class="text-xs text-gray-500">Masukkan nama kategori terapi.</p>
+    </div>
+    <button type="button" id="close-category-dialog" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">×</button>
+  </div>
+  <input type="hidden" id="category-edit-index" value="">
+  <div>
+    <label for="category-input" class="block text-xs font-semibold text-gray-700 mb-1">Nama Kategori</label>
+    <input id="category-input" required maxlength="100" placeholder="Contoh: Refleksi" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+  </div>
+  <div class="flex justify-end space-x-2 pt-2">
+    <button type="button" id="cancel-category-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
+    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
   </div>
 </form>
 </dialog>
@@ -754,7 +782,9 @@
     }
   });
 
-  // CATEGORIES MANAGEMENT
+  // CATEGORIES MANAGEMENT WITH MODAL
+  const categoryDlg = document.getElementById("category-dialog");
+  const categoryForm = document.getElementById("category-form");
   let currentCategories = ["Bekam Sunnah", "Akupunktur", "Akupresur / Pijat", "Ruqyah & Herbal"];
 
   async function loadCategories() {
@@ -812,7 +842,7 @@
       row.className = "flex items-center justify-between bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl";
       
       const span = document.createElement("span");
-      span.className = "font-medium text-gray-800";
+      span.className = "font-medium text-gray-800 text-xs";
       span.textContent = cat;
 
       const actions = document.createElement("div");
@@ -822,7 +852,7 @@
       editBtn.type = "button";
       editBtn.className = "text-emerald-600 hover:text-emerald-700 px-2 py-1 text-xs font-semibold";
       editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-      editBtn.onclick = () => editCategory(index);
+      editBtn.onclick = () => openCategoryModal(index);
 
       const delBtn = document.createElement("button");
       delBtn.type = "button";
@@ -836,46 +866,61 @@
     });
   }
 
-  async function saveCategoriesToFirestore() {
-    try {
-      await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
-      renderCategoriesList();
-      populateCategoryDropdowns();
-      message("Kategori diperbarui.");
-    } catch(err) {
-      console.error("Save categories error:", err);
-      message("Gagal menyimpan kategori.");
+  function openCategoryModal(index = null) {
+    categoryForm.reset();
+    document.getElementById("category-edit-index").value = index !== null ? index : "";
+    document.getElementById("category-dialog-title").textContent = index !== null ? "Edit Kategori" : "Tambah Kategori";
+    if(index !== null) {
+      document.getElementById("category-input").value = currentCategories[index];
     }
+    categoryDlg.showModal();
   }
 
-  document.getElementById("add-category-btn").onclick = async () => {
-    const newCat = prompt("Masukkan nama kategori terapi baru:");
-    if(newCat && newCat.trim()){
-      const trimmed = newCat.trim();
-      if(currentCategories.includes(trimmed)){
+  document.getElementById("add-category-btn").onclick = () => openCategoryModal(null);
+  ["close-category-dialog", "cancel-category-dialog"].forEach(id => {
+    document.getElementById(id).onclick = () => categoryDlg.close();
+  });
+
+  categoryForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const editIdx = document.getElementById("category-edit-index").value;
+    const catName = document.getElementById("category-input").value.trim();
+    if(!catName) return;
+
+    if(editIdx === "") {
+      if(currentCategories.includes(catName)) {
         message("Kategori sudah ada.");
         return;
       }
-      currentCategories.push(trimmed);
-      await saveCategoriesToFirestore();
+      currentCategories.push(catName);
+    } else {
+      currentCategories[parseInt(editIdx)] = catName;
     }
-  };
 
-  window.editCategory = async function(index) {
-    const current = currentCategories[index];
-    const updated = prompt("Ubah nama kategori:", current);
-    if(updated && updated.trim()){
-      const trimmed = updated.trim();
-      currentCategories[index] = trimmed;
-      await saveCategoriesToFirestore();
+    try {
+      await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
+      categoryDlg.close();
+      renderCategoriesList();
+      populateCategoryDropdowns();
+      message("Kategori berhasil disimpan.");
+    } catch(err) {
+      console.error("Save category error:", err);
+      message("Gagal menyimpan kategori.");
     }
-  };
+  });
 
   window.deleteCategory = async function(index) {
     const cat = currentCategories[index];
     if(confirm(`Hapus kategori "${cat}"?`)){
       currentCategories.splice(index, 1);
-      await saveCategoriesToFirestore();
+      try {
+        await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
+        renderCategoriesList();
+        populateCategoryDropdowns();
+        message("Kategori dihapus.");
+      } catch(err) {
+        message("Gagal menghapus kategori.");
+      }
     }
   };
 
