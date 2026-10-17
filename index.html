@@ -24,22 +24,23 @@
   <div class="flex items-center space-x-3">
     <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl"><i class="fa-solid fa-house-medical"></i></div>
     <div>
-      <h1 class="font-bold text-lg leading-tight">Rumah Sehat</h1>
-      <p class="text-xs text-emerald-200">Klinik &amp; Atlas Terapis</p>
+      <h1 id="header-clinic-name" class="font-bold text-lg leading-tight">Rumah Sehat</h1>
+      <p id="header-therapist-name" class="text-xs text-emerald-200">Klinik &amp; Atlas Terapis</p>
     </div>
   </div>
   <span id="db-status" class="text-xs bg-emerald-800 text-emerald-100 px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-emerald-600">
-    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Aktif
+    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud
   </span>
 </header>
 
 <main class="flex-1 p-4">
+<!-- TAB HOME -->
 <section id="tab-home" class="space-y-4">
   <div class="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-5 text-white relative overflow-hidden shadow-lg">
     <div class="relative z-10">
       <small class="text-emerald-200 text-xs font-medium uppercase tracking-wider">Praktik Mandiri Terapis</small>
-      <h2 class="text-2xl font-bold mt-1">Klinik Rumah Sehat</h2>
-      <p class="text-sm text-emerald-100 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Bulakamba, Brebes</p>
+      <h2 id="home-clinic-title" class="text-2xl font-bold mt-1">Klinik Rumah Sehat</h2>
+      <p id="home-address-desc" class="text-sm text-emerald-100 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Bulakamba, Brebes</p>
     </div>
     <i class="fa-solid fa-heart-pulse absolute -right-4 -bottom-6 text-7xl text-white/10"></i>
   </div>
@@ -68,10 +69,11 @@
 
   <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-800 space-y-1">
     <b class="flex items-center gap-1.5 font-semibold text-emerald-900"><i class="fa-solid fa-circle-check"></i> Status Cloud Terhubung</b>
-    <p>Database Firebase Firestore dan Cloudinary Upload siap menyinkronkan data secara real-time.</p>
+    <p>Database Firebase Firestore &amp; Cloudinary siap menyinkronkan data secara real-time.</p>
   </div>
 </section>
 
+<!-- TAB ATLAS -->
 <section id="tab-atlas" class="space-y-4" hidden>
   <div class="flex justify-between items-center">
     <div>
@@ -86,6 +88,7 @@
   <p class="text-[11px] text-gray-400 text-center pt-2">Catatan Atlas merupakan dokumentasi terapis, bukan pengganti nasihat medis resmi.</p>
 </section>
 
+<!-- TAB PATIENTS -->
 <section id="tab-patients" class="space-y-4" hidden>
   <div>
     <h2 class="font-bold text-gray-800 text-lg">Manajemen Pasien</h2>
@@ -98,35 +101,79 @@
   </div>
 </section>
 
+<!-- TAB SETTINGS / PROFILE -->
 <section id="tab-settings" class="space-y-4" hidden>
-  <div>
-    <h2 class="font-bold text-gray-800 text-lg">Profil &amp; Pengaturan</h2>
-    <p class="text-xs text-gray-500">Informasi sistem aplikasi</p>
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="font-bold text-gray-800 text-lg">Profil Terapis &amp; Klinik</h2>
+      <p class="text-xs text-gray-500">Informasi praktisi dan identitas tempat praktik</p>
+    </div>
+    <button id="edit-profile-btn" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+      <i class="fa-solid fa-pen-to-square"></i> Edit Profil
+    </button>
   </div>
-  <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-4 shadow-sm text-xs">
-    <div class="flex items-center space-x-3 pb-3 border-b border-gray-100">
-      <img src="public/icon-192.png" alt="" class="w-10 h-10 rounded-xl bg-emerald-50 object-cover">
+
+  <!-- Profile Card -->
+  <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+    <div class="flex items-center space-x-4 pb-4 border-b border-gray-100">
+      <div class="relative">
+        <img id="view-profile-avatar" src="public/icon-192.png" alt="Avatar Terapis" class="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500 shadow-sm">
+      </div>
       <div>
-        <b class="text-sm block text-gray-800">Rumah Sehat</b>
-        <p class="text-gray-500">Asisten Praktik Terapis</p>
+        <h3 id="view-therapist-name" class="font-bold text-base text-gray-800">Ahmad Rokhmani</h3>
+        <p id="view-clinic-name" class="text-xs font-semibold text-emerald-600">Klinik Rumah Sehat</p>
+        <p id="view-license" class="text-[11px] text-gray-400 mt-0.5"><i class="fa-solid fa-id-card"></i> Izin: Belum Diisi</p>
       </div>
     </div>
-    <div class="flex justify-between py-1 border-b border-gray-50">
-      <span class="text-gray-500">Database Cloud</span>
+
+    <!-- Skills Display -->
+    <div>
+      <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Keahlian &amp; Spesialisasi</span>
+      <div id="view-skills-container" class="flex flex-wrap gap-1.5">
+        <span class="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-emerald-100">Akupunktur</span>
+      </div>
+    </div>
+
+    <!-- Contact & Socials -->
+    <div class="space-y-2 text-xs pt-2 border-t border-gray-100">
+      <div class="flex items-start space-x-2 text-gray-600">
+        <i class="fa-solid fa-location-dot text-emerald-600 mt-0.5 w-4"></i>
+        <span id="view-address">Bulakamba, Brebes</span>
+      </div>
+      <div class="flex items-center space-x-2 text-gray-600">
+        <i class="fa-solid fa-phone text-emerald-600 w-4"></i>
+        <span id="view-phone">-</span>
+      </div>
+      <div class="flex items-center space-x-2 text-gray-600">
+        <i class="fa-brands fa-telegram text-sky-500 w-4"></i>
+        <span id="view-telegram">-</span>
+      </div>
+      <div class="flex items-center space-x-2 text-gray-600">
+        <i class="fa-brands fa-facebook text-blue-600 w-4"></i>
+        <span id="view-facebook">-</span>
+      </div>
+      <div id="view-extra-socials" class="space-y-2 pt-1">
+        <!-- Extra socials dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- System Info -->
+  <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
+    <b class="text-gray-700 block border-b border-gray-100 pb-2">Status Sistem Cloud</b>
+    <div class="flex justify-between py-0.5">
+      <span class="text-gray-500">Database</span>
       <span class="font-semibold text-emerald-600">Firebase Firestore</span>
     </div>
-    <div class="flex justify-between py-1 border-b border-gray-50">
-      <span class="text-gray-500">Storage Foto</span>
+    <div class="flex justify-between py-0.5">
+      <span class="text-gray-500">Media Storage</span>
       <span class="font-semibold text-emerald-600">Cloudinary (rumahsehat_asset)</span>
-    </div>
-    <div class="flex justify-between py-1">
-      <span class="text-gray-500">Telegram Bot</span>
-      <span class="font-semibold text-amber-600">Menunggu Koneksi</span>
     </div>
   </div>
 </section>
 </main>
 
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-2 flex justify-between items-center z-30 shadow-lg" aria-label="Navigasi utama">
   <button class="nav-item active flex flex-col items-center text-emerald-600 space-y-1 transition" data-tab="home"><i class="fa-solid fa-house text-lg"><span></span></i><span class="text-[10px] font-medium">Beranda</span></button>
   <button class="nav-item flex flex-col items-center text-gray-400 hover:text-gray-600 space-y-1 transition" data-tab="atlas"><i class="fa-solid fa-child-reaching text-lg"><span></span></i><span class="text-[10px] font-medium">Atlas</span></button>
@@ -135,6 +182,96 @@
 </nav>
 </div>
 
+<!-- DIALOG EDIT PROFIL -->
+<dialog id="profile-dialog" class="p-0 rounded-2xl shadow-2xl max-w-sm w-11/12 backdrop:bg-black/50">
+<form id="profile-form" class="p-5 space-y-3 bg-white max-h-[85vh] overflow-y-auto">
+  <div class="flex justify-between items-start pb-2 border-b border-gray-100 sticky top-0 bg-white z-10">
+    <div>
+      <h2 class="font-bold text-base text-gray-800">Edit Profil &amp; Klinik</h2>
+      <p class="text-xs text-gray-500">Perbarui identitas terapis &amp; tempat praktik.</p>
+    </div>
+    <button type="button" id="close-profile-dialog" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">×</button>
+  </div>
+  
+  <input type="hidden" id="profile-avatar-url">
+
+  <div>
+    <label class="block text-xs font-semibold text-gray-700 mb-1">Foto Profil / Terapis</label>
+    <input type="file" id="profile-avatar-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+  </div>
+
+  <div class="grid grid-cols-2 gap-2">
+    <div>
+      <label for="input-therapist-name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Terapis</label>
+      <input id="input-therapist-name" required placeholder="Ahmad Rokhmani" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+    <div>
+      <label for="input-clinic-name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Klinik</label>
+      <input id="input-clinic-name" required placeholder="Klinik Rumah Sehat" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+  </div>
+
+  <div>
+    <label for="input-address" class="block text-xs font-semibold text-gray-700 mb-1">Alamat Klinik</label>
+    <input id="input-address" placeholder="Bulakamba, Brebes" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+  </div>
+
+  <div class="grid grid-cols-2 gap-2">
+    <div>
+      <label for="input-phone" class="block text-xs font-semibold text-gray-700 mb-1">No. HP / WA</label>
+      <input id="input-phone" placeholder="08xxxxxxxxx" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+    <div>
+      <label for="input-license" class="block text-xs font-semibold text-gray-700 mb-1">Izin Praktik</label>
+      <input id="input-license" placeholder="STPT/123/2026" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-2">
+    <div>
+      <label for="input-telegram" class="block text-xs font-semibold text-gray-700 mb-1">Telegram</label>
+      <input id="input-telegram" placeholder="@username" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+    <div>
+      <label for="input-facebook" class="block text-xs font-semibold text-gray-700 mb-1">Facebook</label>
+      <input id="input-facebook" placeholder="Nama Akun FB" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+  </div>
+
+  <!-- Socials Dynamic List -->
+  <div class="space-y-2 pt-1 border-t border-gray-100">
+    <div class="flex justify-between items-center">
+      <label class="text-xs font-semibold text-gray-700">Medsos Lainnya</label>
+      <button type="button" id="add-social-btn" class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 hover:underline"><i class="fa-solid fa-plus"></i> Add Medsos</button>
+    </div>
+    <div id="socials-input-container" class="space-y-2">
+      <!-- Dynamic social inputs -->
+    </div>
+  </div>
+
+  <!-- Skills Dynamic List -->
+  <div class="space-y-2 pt-1 border-t border-gray-100">
+    <div class="flex justify-between items-center">
+      <label class="text-xs font-semibold text-gray-700">Keahlian / Skill</label>
+      <button type="button" id="add-skill-btn" class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 hover:underline"><i class="fa-solid fa-plus"></i> Add Skill</button>
+    </div>
+    <div id="skills-input-container" class="space-y-2">
+      <div class="flex items-center gap-2">
+        <input class="skill-input w-full border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="Akupunktur" placeholder="Contoh: Akupunktur">
+      </div>
+    </div>
+  </div>
+
+  <div id="profile-upload-status" class="text-[10px] text-emerald-600 font-medium hidden">Mengupload foto profil...</div>
+
+  <div class="flex justify-end space-x-2 pt-3">
+    <button type="button" id="cancel-profile-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
+    <button type="submit" id="save-profile-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
+  </div>
+</form>
+</dialog>
+
+<!-- DIALOG ATLAS -->
 <dialog id="atlas-dialog" class="p-0 rounded-2xl shadow-2xl max-w-sm w-11/12 backdrop:bg-black/50">
 <form id="atlas-form" class="p-5 space-y-3 bg-white">
   <div class="flex justify-between items-start pb-2 border-b border-gray-100">
@@ -164,7 +301,7 @@
   <div>
     <label for="atlas-image-file" class="block text-xs font-semibold text-gray-700 mb-1">Foto Titik Terapi (Opsional)</label>
     <input type="file" id="atlas-image-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-    <div id="upload-status" class="text-[10px] text-emerald-600 mt-1 font-medium" style="display:none;">Mengupload foto ke Cloudinary...</div>
+    <div id="upload-status" class="text-[10px] text-emerald-600 mt-1 font-medium hidden">Mengupload foto ke Cloudinary...</div>
   </div>
   <div>
     <label for="atlas-desc" class="block text-xs font-semibold text-gray-700 mb-1">Catatan terapis</label>
@@ -179,10 +316,10 @@
 
 <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-xl shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
 
-<!-- Firebase SDK (Modular v10 via CDN) -->
+<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDmsO4vPpT0A-D4CLzUvBSy6G0skT9pldY",
@@ -207,6 +344,7 @@
       if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")
     });
     if(id==="atlas") loadAtlas();
+    if(id==="settings") loadProfile();
     window.scrollTo({top:0,behavior:"smooth"})
   };
   document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
@@ -221,7 +359,185 @@
     toastTimer=setTimeout(()=>toast.classList.add("opacity-0"),2500)
   }
 
-  // Load Atlas from Firestore
+  // PROFILE FUNCTIONS
+  const profileDlg = document.getElementById("profile-dialog");
+  const profileForm = document.getElementById("profile-form");
+  const skillsContainer = document.getElementById("skills-input-container");
+  const socialsContainer = document.getElementById("socials-input-container");
+
+  document.getElementById("add-skill-btn").onclick = () => addSkillInput("");
+  document.getElementById("add-social-btn").onclick = () => addSocialInput("", "");
+
+  function addSkillInput(val = ""){
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2";
+    div.innerHTML = `<input class="skill-input w-full border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${val}" placeholder="Contoh: Bekam Sunnah"><button type="button" class="text-rose-500 text-xs px-1 font-bold" onclick="this.parentElement.remove()">×</button>`;
+    skillsContainer.append(div);
+  }
+
+  function addSocialInput(platform = "", link = ""){
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2";
+    div.innerHTML = `<input class="social-name w-1/3 border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${platform}" placeholder="Instagram"><input class="social-val w-2/3 border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${link}" placeholder="@username/link"><button type="button" class="text-rose-500 text-xs px-1 font-bold" onclick="this.parentElement.remove()">×</button>`;
+    socialsContainer.append(div);
+  }
+
+  async function loadProfile() {
+    try {
+      const docRef = doc(db, "settings", "profile");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const p = docSnap.data();
+        document.getElementById("header-clinic-name").textContent = p.clinicName || "Rumah Sehat";
+        document.getElementById("header-therapist-name").textContent = p.therapistName ? `Terapis: ${p.therapistName}` : "Klinik & Atlas Terapis";
+        document.getElementById("home-clinic-title").textContent = p.clinicName || "Klinik Rumah Sehat";
+        document.getElementById("home-address-desc").innerHTML = `<i class="fa-solid fa-location-dot"></i> ${p.address || "Bulakamba, Brebes"}`;
+
+        document.getElementById("view-therapist-name").textContent = p.therapistName || "Ahmad Rokhmani";
+        document.getElementById("view-clinic-name").textContent = p.clinicName || "Klinik Rumah Sehat";
+        document.getElementById("view-license").innerHTML = `<i class="fa-solid fa-id-card"></i> Izin: ${p.license || "Belum Diisi"}`;
+        document.getElementById("view-address").textContent = p.address || "Bulakamba, Brebes";
+        document.getElementById("view-phone").textContent = p.phone || "-";
+        document.getElementById("view-telegram").textContent = p.telegram || "-";
+        document.getElementById("view-facebook").textContent = p.facebook || "-";
+        
+        if(p.avatarUrl){
+          document.getElementById("view-profile-avatar").src = p.avatarUrl;
+        }
+
+        // Render Skills
+        const skillsBox = document.getElementById("view-skills-container");
+        skillsBox.replaceChildren();
+        if(p.skills && p.skills.length){
+          p.skills.forEach(s => {
+            const span = document.createElement("span");
+            span.className = "text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-emerald-100";
+            span.textContent = s;
+            skillsBox.append(span);
+          });
+        } else {
+          skillsBox.innerHTML = '<span class="text-xs text-gray-400">Belum ada keahlian diinput</span>';
+        }
+
+        // Render Extra Socials
+        const extraSocialsBox = document.getElementById("view-extra-socials");
+        extraSocialsBox.replaceChildren();
+        if(p.extraSocials && p.extraSocials.length){
+          p.extraSocials.forEach(soc => {
+            const div = document.createElement("div");
+            div.className = "flex items-center space-x-2 text-gray-600";
+            div.innerHTML = `<i class="fa-solid fa-globe text-emerald-600 w-4"></i><span><b>${soc.name}:</b> ${soc.val}</span>`;
+            extraSocialsBox.append(div);
+          });
+        }
+      }
+    } catch(err) {
+      console.error("Profile load error:", err);
+    }
+  }
+
+  document.getElementById("edit-profile-btn").onclick = async () => {
+    profileForm.reset();
+    skillsContainer.replaceChildren();
+    socialsContainer.replaceChildren();
+
+    try {
+      const docSnap = await getDoc(doc(db, "settings", "profile"));
+      if(docSnap.exists()){
+        const p = docSnap.data();
+        document.getElementById("input-therapist-name").value = p.therapistName || "";
+        document.getElementById("input-clinic-name").value = p.clinicName || "";
+        document.getElementById("input-address").value = p.address || "";
+        document.getElementById("input-phone").value = p.phone || "";
+        document.getElementById("input-license").value = p.license || "";
+        document.getElementById("input-telegram").value = p.telegram || "";
+        document.getElementById("input-facebook").value = p.facebook || "";
+        document.getElementById("profile-avatar-url").value = p.avatarUrl || "";
+
+        if(p.skills && p.skills.length){
+          p.skills.forEach(s => addSkillInput(s));
+        } else {
+          addSkillInput("Akupunktur");
+        }
+
+        if(p.extraSocials && p.extraSocials.length){
+          p.extraSocials.forEach(soc => addSocialInput(soc.name, soc.val));
+        }
+      } else {
+        addSkillInput("Akupunktur");
+      }
+    } catch(e){
+      addSkillInput("Akupunktur");
+    }
+    profileDlg.showModal();
+  };
+
+  ["close-profile-dialog","cancel-profile-dialog"].forEach(id => document.getElementById(id).onclick = () => profileDlg.close());
+
+  profileForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const saveBtn = document.getElementById("save-profile-btn");
+    const statusText = document.getElementById("profile-upload-status");
+    saveBtn.disabled = true;
+
+    let avatarUrl = document.getElementById("profile-avatar-url").value;
+    const avatarFile = document.getElementById("profile-avatar-file").files[0];
+
+    if(avatarFile){
+      statusText.classList.remove("hidden");
+      const formData = new FormData();
+      formData.append("file", avatarFile);
+      formData.append("upload_preset", "rumahsehat_asset");
+
+      try {
+        const res = await fetch("https://api.cloudinary.com/v1_1/dkm9.../image/upload", {
+          method: "POST",
+          body: formData
+        });
+        const json = await res.json();
+        if(json.secure_url) avatarUrl = json.secure_url;
+      } catch(err){ console.error(err); }
+    }
+
+    const skills = Array.from(document.querySelectorAll(".skill-input")).map(i => i.value.trim()).filter(Boolean);
+    const socialNames = Array.from(document.querySelectorAll(".social-name"));
+    const socialVals = Array.from(document.querySelectorAll(".social-val"));
+    const extraSocials = [];
+    socialNames.forEach((el, idx) => {
+      if(el.value.trim() && socialVals[idx].value.trim()){
+        extraSocials.push({ name: el.value.trim(), val: socialVals[idx].value.trim() });
+      }
+    });
+
+    const profileData = {
+      therapistName: document.getElementById("input-therapist-name").value.trim(),
+      clinicName: document.getElementById("input-clinic-name").value.trim(),
+      address: document.getElementById("input-address").value.trim(),
+      phone: document.getElementById("input-phone").value.trim(),
+      license: document.getElementById("input-license").value.trim(),
+      telegram: document.getElementById("input-telegram").value.trim(),
+      facebook: document.getElementById("input-facebook").value.trim(),
+      skills,
+      extraSocials,
+      avatarUrl,
+      updatedAt: serverTimestamp()
+    };
+
+    try {
+      await setDoc(doc(db, "settings", "profile"), profileData);
+      message("Profil berhasil diperbarui!");
+      profileDlg.close();
+      loadProfile();
+    } catch(err){
+      message("Gagal menyimpan profil.");
+      console.error(err);
+    } finally {
+      saveBtn.disabled = false;
+      statusText.classList.add("hidden");
+    }
+  });
+
+  // ATLAS FUNCTIONS
   window.loadAtlas = async function() {
     list.innerHTML = '<div class="text-center py-8 text-gray-400 text-xs"><i class="fa-solid fa-spinner animate-spin text-base"></i> Memuat data dari Cloud...</div>';
     try {
@@ -278,9 +594,7 @@
               await deleteDoc(doc(db, "atlas", item.id));
               loadAtlas();
               message("Catatan dihapus dari Cloud.");
-            } catch(err) {
-              message("Gagal menghapus.");
-            }
+            } catch(err) { message("Gagal menghapus."); }
           }
         };
         actions.append(edit,del);
@@ -289,7 +603,7 @@
       });
     } catch(err) {
       console.error(err);
-      list.innerHTML = '<div class="text-center py-8 text-rose-500 text-xs">Gagal memuat data dari Cloud. Periksa koneksi internet.</div>';
+      list.innerHTML = '<div class="text-center py-8 text-rose-500 text-xs">Gagal memuat data dari Cloud.</div>';
     }
   }
 
@@ -301,7 +615,7 @@
     document.getElementById("atlas-name").value = item ? item.name : "";
     document.getElementById("atlas-category").value = item ? (item.category || "") : "";
     document.getElementById("atlas-desc").value = item ? item.desc : "";
-    document.getElementById("upload-status").style.display = "none";
+    document.getElementById("upload-status").classList.add("hidden");
     dlg.showModal();
   }
 
@@ -322,60 +636,44 @@
 
     submitBtn.disabled = true;
 
-    // Jika ada file gambar baru yang dipilih, upload ke Cloudinary
     if(fileInput.files.length > 0){
-      uploadStatus.style.display = "block";
-      uploadStatus.textContent = "Mengupload foto ke Cloudinary...";
+      uploadStatus.classList.remove("hidden");
       const file = fileInput.files[0];
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "rumahsehat_asset");
 
       try {
-        const res = await fetch("https://api.cloudinary.com/v1_1/dkm9.../image/upload", { // Sesuaikan jika cloud name berbeda
+        const res = await fetch("https://api.cloudinary.com/v1_1/dkm9.../image/upload", {
           method: "POST",
           body: formData
         });
         const json = await res.json();
-        if(json.secure_url){
-          imageUrl = json.secure_url;
-        }
-      } catch(err) {
-        console.error("Upload error:", err);
-      }
+        if(json.secure_url) imageUrl = json.secure_url;
+      } catch(err) { console.error(err); }
     }
 
-    // Simpan ke Firestore
     try {
-      const record = {
-        name,
-        category,
-        desc,
-        imageUrl,
-        createdAt: serverTimestamp()
-      };
-
+      const record = { name, category, desc, imageUrl, createdAt: serverTimestamp() };
       if(id){
         await updateDoc(doc(db, "atlas", id), { name, category, desc, imageUrl });
-        message("Catatan diperbarui di Cloud.");
+        message("Catatan diperbarui.");
       } else {
         await addDoc(collection(db, "atlas"), record);
-        message("Catatan baru disimpan ke Cloud.");
+        message("Catatan baru disimpan.");
       }
-
       dlg.close();
       loadAtlas();
     } catch(err) {
-      console.error(err);
-      message("Gagal menyimpan ke database.");
+      message("Gagal menyimpan.");
     } finally {
       submitBtn.disabled = false;
-      uploadStatus.style.display = "none";
+      uploadStatus.classList.add("hidden");
     }
   });
 
-  // Load awal saat halaman dibuka
-  loadAtlas();
+  // Initial Load
+  loadProfile();
 </script>
 </body>
 </html>
