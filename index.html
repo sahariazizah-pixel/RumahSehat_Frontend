@@ -16,7 +16,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
   body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; color: #0f172a; }
-  /* Make text darker and larger for users with vision correction */
   .text-gray-400, .text-gray-500, .text-gray-600 { color: #1e293b !important; font-weight: 500; }
   .text-gray-700 { color: #0f172a !important; font-weight: 600; }
   .text-[10px], .text-[11px], .text-xs { font-size: 13px !important; line-height: 1.5 !important; }
@@ -355,7 +354,620 @@
 
 <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-xl shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
 
-<!-- Main App Entry Script -->
-<script type="module" src="js/app.js"></script>
+<!-- Integrated Application Script -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDmsO4vPpT0A-D4CLzUvBSy6G0skT9pldY",
+    authDomain: "rumahsehat-dd146.firebaseapp.com",
+    projectId: "rumahsehat-dd146",
+    storageBucket: "rumahsehat-dd146.firebasestorage.app",
+    messagingSenderId: "854107516539",
+    appId: "1:854107516539:web:7019a0162ae50015573cde",
+    measurementId: "G-7WW82H0KXK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const tabIds = ["home", "atlas", "patients", "settings"];
+
+  window.showTab = function(id) {
+    tabIds.forEach(t => {
+      const section = document.getElementById("tab-" + t);
+      if (section) {
+        if (t === id) {
+          section.removeAttribute("hidden");
+        } else {
+          section.setAttribute("hidden", "true");
+        }
+      }
+    });
+
+    document.querySelectorAll(".nav-item").forEach(b => {
+      const active = (b.dataset.tab === id);
+      if (active) {
+        b.classList.add("text-emerald-600");
+        b.classList.remove("text-gray-400");
+        b.setAttribute("aria-current", "page");
+      } else {
+        b.classList.remove("text-emerald-600");
+        b.classList.add("text-gray-400");
+        b.removeAttribute("aria-current");
+      }
+    });
+
+    if (id === "atlas" && typeof window.loadAtlas === "function") {
+      window.loadAtlas();
+    }
+    if (id === "settings") {
+      if (typeof window.loadProfile === "function") window.loadProfile();
+      if (typeof window.loadCategories === "function") window.loadCategories();
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-tab]");
+    if (trigger) {
+      const targetTab = trigger.dataset.tab;
+      if (targetTab) {
+        window.showTab(targetTab);
+      }
+    }
+  });
+
+  function message(s){
+    const toast = document.getElementById("toast");
+    if(!toast) return;
+    toast.textContent = s;
+    toast.classList.remove("opacity-0");
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.add("opacity-0"), 2500);
+  }
+  window.message = message;
+
+  // PROFILE FUNCTIONS
+  const profileDlg = document.getElementById("profile-dialog");
+  const profileForm = document.getElementById("profile-form");
+  const skillsContainer = document.getElementById("skills-input-container");
+  const socialsContainer = document.getElementById("socials-input-container");
+
+  const addSkillBtn = document.getElementById("add-skill-btn");
+  if(addSkillBtn) addSkillBtn.onclick = () => addSkillInput("");
+
+  const addSocialBtn = document.getElementById("add-social-btn");
+  if(addSocialBtn) addSocialBtn.onclick = () => addSocialInput("", "");
+
+  function addSkillInput(val = ""){
+    if(!skillsContainer) return;
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2";
+    div.innerHTML = `<input class="skill-input w-full border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${val}" placeholder="Contoh: Bekam Sunnah"><button type="button" class="text-rose-500 text-xs px-1 font-bold" onclick="this.parentElement.remove()">×</button>`;
+    skillsContainer.append(div);
+  }
+
+  function addSocialInput(platform = "", link = ""){
+    if(!socialsContainer) return;
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2";
+    div.innerHTML = `<input class="social-name w-1/3 border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${platform}" placeholder="Instagram"><input class="social-val w-2/3 border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500" value="${link}" placeholder="@username/link"><button type="button" class="text-rose-500 text-xs px-1 font-bold" onclick="this.parentElement.remove()">×</button>`;
+    socialsContainer.append(div);
+  }
+
+  async function loadProfile() {
+    try {
+      const docRef = doc(db, "settings", "profile");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const p = docSnap.data();
+        const hClinic = document.getElementById("header-clinic-name");
+        if(hClinic) hClinic.textContent = p.clinicName || "Rumah Sehat";
+        const hTherapist = document.getElementById("header-therapist-name");
+        if(hTherapist) hTherapist.textContent = p.therapistName ? `Terapis: ${p.therapistName}` : "Klinik & Atlas Terapis";
+        const homeClinic = document.getElementById("home-clinic-title");
+        if(homeClinic) homeClinic.textContent = p.clinicName || "Klinik Rumah Sehat";
+        const homeAddr = document.getElementById("home-address-desc");
+        if(homeAddr) homeAddr.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${p.address || "Bulakamba, Brebes"}`;
+
+        const vTherapist = document.getElementById("view-therapist-name");
+        if(vTherapist) vTherapist.textContent = p.therapistName || "Ahmad Rokhmani";
+        const vClinic = document.getElementById("view-clinic-name");
+        if(vClinic) vClinic.textContent = p.clinicName || "Klinik Rumah Sehat";
+        const vLicense = document.getElementById("view-license");
+        if(vLicense) vLicense.innerHTML = `<i class="fa-solid fa-id-card"></i> Izin: ${p.license || "Belum Diisi"}`;
+        const vAddress = document.getElementById("view-address");
+        if(vAddress) vAddress.textContent = p.address || "Bulakamba, Brebes";
+        const vPhone = document.getElementById("view-phone");
+        if(vPhone) vPhone.textContent = p.phone || "-";
+        const vTelegram = document.getElementById("view-telegram");
+        if(vTelegram) vTelegram.textContent = p.telegram || "-";
+        const vFacebook = document.getElementById("view-facebook");
+        if(vFacebook) vFacebook.textContent = p.facebook || "-";
+        
+        const vAvatar = document.getElementById("view-profile-avatar");
+        if(vAvatar && p.avatarUrl) vAvatar.src = p.avatarUrl;
+
+        const vCover = document.getElementById("view-cover-banner");
+        if(vCover && p.coverUrl) vCover.style.backgroundImage = `url('${p.coverUrl}')`;
+
+        const headerLogo = document.getElementById("header-app-logo");
+        if(headerLogo && p.logoUrl) headerLogo.src = p.logoUrl;
+
+        const skillsBox = document.getElementById("view-skills-container");
+        if(skillsBox) {
+          skillsBox.replaceChildren();
+          if(p.skills && p.skills.length){
+            p.skills.forEach(s => {
+              const span = document.createElement("span");
+              span.className = "text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-medium border border-emerald-100";
+              span.textContent = s;
+              skillsBox.append(span);
+            });
+          } else {
+            skillsBox.innerHTML = '<span class="text-xs text-gray-400">Belum ada keahlian diinput</span>';
+          }
+        }
+
+        const extraSocialsBox = document.getElementById("view-extra-socials");
+        if(extraSocialsBox) {
+          extraSocialsBox.replaceChildren();
+          if(p.extraSocials && p.extraSocials.length){
+            p.extraSocials.forEach(soc => {
+              const div = document.createElement("div");
+              div.className = "flex items-center space-x-2 text-gray-600";
+              div.innerHTML = `<i class="fa-solid fa-globe text-emerald-600 w-4"></i><span><b>${soc.name}:</b> ${soc.val}</span>`;
+              extraSocialsBox.append(div);
+            });
+          }
+        }
+      }
+    } catch(err) {
+      console.error("Profile load error:", err);
+    }
+  }
+  window.loadProfile = loadProfile;
+
+  const editProfileBtn = document.getElementById("edit-profile-btn");
+  if(editProfileBtn) {
+    editProfileBtn.onclick = async () => {
+      if(profileForm) profileForm.reset();
+      if(skillsContainer) skillsContainer.replaceChildren();
+      if(socialsContainer) socialsContainer.replaceChildren();
+
+      try {
+        const docSnap = await getDoc(doc(db, "settings", "profile"));
+        if(docSnap.exists()){
+          const p = docSnap.data();
+          document.getElementById("input-therapist-name").value = p.therapistName || "";
+          document.getElementById("input-clinic-name").value = p.clinicName || "";
+          document.getElementById("input-address").value = p.address || "";
+          document.getElementById("input-phone").value = p.phone || "";
+          document.getElementById("input-license").value = p.license || "";
+          document.getElementById("input-telegram").value = p.telegram || "";
+          document.getElementById("input-facebook").value = p.facebook || "";
+          document.getElementById("profile-avatar-url").value = p.avatarUrl || "";
+          document.getElementById("profile-cover-url").value = p.coverUrl || "";
+          document.getElementById("profile-logo-url").value = p.logoUrl || "";
+
+          if(p.skills && p.skills.length){
+            p.skills.forEach(s => addSkillInput(s));
+          } else {
+            addSkillInput("Akupunktur");
+          }
+
+          if(p.extraSocials && p.extraSocials.length){
+            p.extraSocials.forEach(soc => addSocialInput(soc.name, soc.val));
+          }
+        } else {
+          addSkillInput("Akupunktur");
+        }
+      } catch(e){
+        addSkillInput("Akupunktur");
+      }
+      if(profileDlg) profileDlg.showModal();
+    };
+  }
+
+  ["close-profile-dialog","cancel-profile-dialog"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.onclick = () => { if(profileDlg) profileDlg.close(); };
+  });
+
+  if(profileForm) {
+    profileForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const saveBtn = document.getElementById("save-profile-btn");
+      const statusText = document.getElementById("profile-upload-status");
+      if(saveBtn) saveBtn.disabled = true;
+
+      let coverUrl = document.getElementById("profile-cover-url").value;
+      const coverFile = document.getElementById("profile-cover-file").files[0];
+      if(coverFile){
+        if(statusText) { statusText.classList.remove("hidden"); statusText.textContent = "Mengupload foto sampul..."; }
+        const formData = new FormData();
+        formData.append("file", coverFile);
+        formData.append("upload_preset", "rumahsehat_asset");
+        try {
+          const res = await fetch("https://api.cloudinary.com/v1_1/u8fb8blx/image/upload", { method: "POST", body: formData });
+          const json = await res.json();
+          if(json.secure_url) coverUrl = json.secure_url;
+        } catch(err){ console.error(err); }
+      }
+
+      let avatarUrl = document.getElementById("profile-avatar-url").value;
+      const avatarFile = document.getElementById("profile-avatar-file").files[0];
+      if(avatarFile){
+        if(statusText) { statusText.classList.remove("hidden"); statusText.textContent = "Mengupload foto profil..."; }
+        const formData = new FormData();
+        formData.append("file", avatarFile);
+        formData.append("upload_preset", "rumahsehat_asset");
+        try {
+          const res = await fetch("https://api.cloudinary.com/v1_1/u8fb8blx/image/upload", { method: "POST", body: formData });
+          const json = await res.json();
+          if(json.secure_url) avatarUrl = json.secure_url;
+        } catch(err){ console.error(err); }
+      }
+
+      let logoUrl = document.getElementById("profile-logo-url").value;
+      const logoFile = document.getElementById("profile-logo-file").files[0];
+      if(logoFile){
+        if(statusText) { statusText.classList.remove("hidden"); statusText.textContent = "Mengupload logo aplikasi..."; }
+        const formData = new FormData();
+        formData.append("file", logoFile);
+        formData.append("upload_preset", "rumahsehat_asset");
+        try {
+          const res = await fetch("https://api.cloudinary.com/v1_1/u8fb8blx/image/upload", { method: "POST", body: formData });
+          const json = await res.json();
+          if(json.secure_url) logoUrl = json.secure_url;
+        } catch(err){ console.error(err); }
+      }
+
+      const skills = Array.from(document.querySelectorAll(".skill-input")).map(i => i.value.trim()).filter(Boolean);
+      const socialNames = Array.from(document.querySelectorAll(".social-name"));
+      const socialVals = Array.from(document.querySelectorAll(".social-val"));
+      const extraSocials = [];
+      socialNames.forEach((el, idx) => {
+        if(el.value.trim() && socialVals[idx].value.trim()){
+          extraSocials.push({ name: el.value.trim(), val: socialVals[idx].value.trim() });
+        }
+      });
+
+      const profileData = {
+        therapistName: document.getElementById("input-therapist-name").value.trim(),
+        clinicName: document.getElementById("input-clinic-name").value.trim(),
+        address: document.getElementById("input-address").value.trim(),
+        phone: document.getElementById("input-phone").value.trim(),
+        license: document.getElementById("input-license").value.trim(),
+        telegram: document.getElementById("input-telegram").value.trim(),
+        facebook: document.getElementById("input-facebook").value.trim(),
+        skills,
+        extraSocials,
+        coverUrl,
+        avatarUrl,
+        logoUrl,
+        updatedAt: serverTimestamp()
+      };
+
+      try {
+        await setDoc(doc(db, "settings", "profile"), profileData);
+        message("Profil berhasil diperbarui!");
+        if(profileDlg) profileDlg.close();
+        loadProfile();
+      } catch(err){
+        message("Gagal menyimpan profil.");
+        console.error(err);
+      } finally {
+        if(saveBtn) saveBtn.disabled = false;
+        if(statusText) statusText.classList.add("hidden");
+      }
+    });
+  }
+
+  // CATEGORIES MANAGEMENT
+  const categoryDlg = document.getElementById("category-dialog");
+  const categoryForm = document.getElementById("category-form");
+  let currentCategories = ["Bekam Sunnah", "Akupunktur", "Akupresur / Pijat", "Ruqyah & Herbal"];
+
+  async function loadCategories() {
+    try {
+      const docRef = doc(db, "settings", "categories");
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()){
+        const data = docSnap.data();
+        if(data.categories && Array.isArray(data.categories)){
+          currentCategories = data.categories;
+        }
+      } else {
+        await setDoc(docRef, { categories: currentCategories });
+      }
+      renderCategoriesList();
+      populateCategoryDropdowns();
+    } catch(err) {
+      console.error("Load categories error:", err);
+      renderCategoriesList();
+      populateCategoryDropdowns();
+    }
+  }
+  window.loadCategories = loadCategories;
+
+  function populateCategoryDropdowns() {
+    const select = document.getElementById("atlas-category");
+    if(!select) return;
+    const val = select.value;
+    select.replaceChildren();
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Pilih kategori";
+    select.append(defaultOpt);
+
+    currentCategories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      select.append(opt);
+    });
+    select.value = val;
+  }
+
+  function renderCategoriesList() {
+    const box = document.getElementById("settings-categories-list");
+    if(!box) return;
+    box.replaceChildren();
+
+    if(!currentCategories.length){
+      box.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">Belum ada data</div>';
+      return;
+    }
+
+    currentCategories.forEach((cat, index) => {
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl";
+      
+      const span = document.createElement("span");
+      span.className = "font-medium text-gray-800 text-xs";
+      span.textContent = cat;
+
+      const actions = document.createElement("div");
+      actions.className = "flex items-center gap-1.5";
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "text-emerald-600 hover:text-emerald-700 px-2 py-1 text-xs font-semibold";
+      editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+      editBtn.onclick = () => openCategoryModal(index);
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "text-rose-500 hover:text-rose-600 px-2 py-1 text-xs font-semibold";
+      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      delBtn.onclick = () => deleteCategory(index);
+
+      actions.append(editBtn, delBtn);
+      row.append(span, actions);
+      box.append(row);
+    });
+  }
+
+  function openCategoryModal(index = null) {
+    if(!categoryForm) return;
+    categoryForm.reset();
+    document.getElementById("category-edit-index").value = index !== null ? index : "";
+    document.getElementById("category-dialog-title").textContent = index !== null ? "Edit Kategori" : "Tambah Kategori";
+    if(index !== null) {
+      document.getElementById("category-input").value = currentCategories[index];
+    }
+    if(categoryDlg) categoryDlg.showModal();
+  }
+
+  const addCategoryBtn = document.getElementById("add-category-btn");
+  if(addCategoryBtn) addCategoryBtn.onclick = () => openCategoryModal(null);
+
+  ["close-category-dialog", "cancel-category-dialog"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.onclick = () => { if(categoryDlg) categoryDlg.close(); };
+  });
+
+  if(categoryForm) {
+    categoryForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const editIdx = document.getElementById("category-edit-index").value;
+      const catName = document.getElementById("category-input").value.trim();
+      if(!catName) return;
+
+      if(editIdx === "") {
+        if(currentCategories.includes(catName)) {
+          message("Kategori sudah ada.");
+          return;
+        }
+        currentCategories.push(catName);
+      } else {
+        currentCategories[parseInt(editIdx)] = catName;
+      }
+
+      try {
+        await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
+        if(categoryDlg) categoryDlg.close();
+        renderCategoriesList();
+        populateCategoryDropdowns();
+        message("Kategori berhasil disimpan.");
+      } catch(err) {
+        console.error("Save category error:", err);
+        message("Gagal menyimpan kategori.");
+      }
+    });
+  }
+
+  window.deleteCategory = async function(index) {
+    const cat = currentCategories[index];
+    if(confirm(`Hapus kategori "${cat}"?`)){
+      currentCategories.splice(index, 1);
+      try {
+        await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
+        renderCategoriesList();
+        populateCategoryDropdowns();
+        message("Kategori dihapus.");
+      } catch(err) {
+        message("Gagal menghapus kategori.");
+      }
+    }
+  };
+
+  // ATLAS FUNCTIONS
+  window.loadAtlas = async function() {
+    const list = document.getElementById("atlas-list");
+    if(!list) return;
+    list.innerHTML = '<div class="text-center py-8 text-gray-400 text-xs"><i class="fa-solid fa-spinner animate-spin text-base"></i> Memuat data dari Cloud...</div>';
+    try {
+      const q = query(collection(db, "atlas"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      list.replaceChildren();
+      
+      if(querySnapshot.empty){
+        const e = document.createElement("div");
+        e.className = "bg-white border border-gray-200 rounded-2xl p-6 text-center space-y-2";
+        e.innerHTML = '<i class="fa-solid fa-book-medical text-2xl text-emerald-600"></i><h3 class="font-bold text-gray-800 text-sm">Belum ada data</h3><p class="text-xs text-gray-500">Tekan Tambah untuk membuat catatan.</p>';
+        list.append(e);
+        return;
+      }
+
+      querySnapshot.forEach((docSnap) => {
+        const item = { id: docSnap.id, ...docSnap.data() };
+        const card = document.createElement("article");
+        card.className = "bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm";
+        
+        if(item.imageUrl){
+          const img = document.createElement("img");
+          img.src = item.imageUrl;
+          img.className = "w-full h-36 object-cover rounded-xl border border-gray-100";
+          card.append(img);
+        }
+
+        const top = document.createElement("div");
+        top.className = "flex justify-between items-start";
+        const h = document.createElement("h3");
+        h.className = "font-bold text-gray-800 text-sm";
+        h.textContent = item.name;
+        const chip = document.createElement("span");
+        chip.className = "text-[10px] bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-100";
+        chip.textContent = item.category || "Tanpa kategori";
+        top.append(h, chip);
+        
+        const p = document.createElement("p");
+        p.className = "text-xs text-gray-600 leading-relaxed whitespace-pre-wrap";
+        p.textContent = item.desc;
+        
+        const actions = document.createElement("div");
+        actions.className = "flex justify-end space-x-3 pt-2 border-t border-gray-50 text-xs font-semibold";
+        const edit = document.createElement("button");
+        edit.className = "text-emerald-600 hover:text-emerald-700";
+        edit.textContent = "Edit";
+        edit.onclick = () => openAtlasDialog(item);
+        const del = document.createElement("button");
+        del.className = "text-rose-500 hover:text-rose-600";
+        del.textContent = "Hapus";
+        del.onclick = async () => {
+          if(confirm("Hapus catatan " + item.name + "?")){
+            try {
+              await deleteDoc(doc(db, "atlas", item.id));
+              window.loadAtlas();
+              message("Catatan dihapus dari Cloud.");
+            } catch(err) { message("Gagal menghapus."); }
+          }
+        };
+        actions.append(edit, del);
+        card.append(top, p, actions);
+        list.append(card);
+      });
+    } catch(err) {
+      console.error(err);
+      if(list) list.innerHTML = '<div class="text-center py-8 text-rose-500 text-xs">Gagal memuat data dari Cloud.</div>';
+    }
+  };
+
+  const atlasDlg = document.getElementById("atlas-dialog");
+  const atlasForm = document.getElementById("atlas-form");
+
+  function openAtlasDialog(item = null){
+    if(!atlasForm) return;
+    atlasForm.reset();
+    document.getElementById("edit-id").value = item ? item.id : "";
+    document.getElementById("atlas-image-url").value = item ? (item.imageUrl || "") : "";
+    document.getElementById("dialog-title").textContent = item ? "Edit Titik Atlas" : "Tambah Titik Atlas";
+    document.getElementById("atlas-name").value = item ? item.name : "";
+    document.getElementById("atlas-category").value = item ? (item.category || "") : "";
+    document.getElementById("atlas-desc").value = item ? item.desc : "";
+    const uploadStatus = document.getElementById("upload-status");
+    if(uploadStatus) uploadStatus.classList.add("hidden");
+    if(atlasDlg) atlasDlg.showModal();
+  }
+
+  const addAtlasBtn = document.getElementById("add-atlas");
+  if(addAtlasBtn) addAtlasBtn.onclick = () => openAtlasDialog();
+
+  ["close-dialog", "cancel-dialog"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.onclick = () => { if(atlasDlg) atlasDlg.close(); };
+  });
+
+  if(atlasForm) {
+    atlasForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("edit-id").value;
+      const name = document.getElementById("atlas-name").value.trim();
+      const category = document.getElementById("atlas-category").value;
+      const desc = document.getElementById("atlas-desc").value.trim();
+      let imageUrl = document.getElementById("atlas-image-url").value;
+
+      const fileInput = document.getElementById("atlas-image-file");
+      const submitBtn = document.getElementById("submit-btn");
+      const uploadStatus = document.getElementById("upload-status");
+
+      if(submitBtn) submitBtn.disabled = true;
+
+      if(fileInput && fileInput.files.length > 0){
+        if(uploadStatus) uploadStatus.classList.remove("hidden");
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "rumahsehat_asset");
+
+        try {
+          const res = await fetch("https://api.cloudinary.com/v1_1/u8fb8blx/image/upload", {
+            method: "POST",
+            body: formData
+          });
+          const json = await res.json();
+          if(json.secure_url) imageUrl = json.secure_url;
+        } catch(err) { console.error(err); }
+      }
+
+      try {
+        const record = { name, category, desc, imageUrl, createdAt: serverTimestamp() };
+        if(id){
+          await updateDoc(doc(db, "atlas", id), { name, category, desc, imageUrl });
+          message("Catatan diperbarui.");
+        } else {
+          await addDoc(collection(db, "atlas"), record);
+          message("Catatan baru disimpan.");
+        }
+        if(atlasDlg) atlasDlg.close();
+        window.loadAtlas();
+      } catch(err) {
+        message("Gagal menyimpan.");
+      } finally {
+        if(submitBtn) submitBtn.disabled = false;
+        if(uploadStatus) uploadStatus.classList.add("hidden");
+      }
+    });
+  }
+
+  // Initial Startup
+  loadProfile();
+  loadCategories();
+</script>
 </body>
 </html>
