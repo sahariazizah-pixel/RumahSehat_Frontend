@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Rumah Sehat",
+  "short_name": "Rumah Sehat",
+  "description": "Pendamping praktik terapis, Atlas Terapi, dan administrasi pasien.",
+  "lang": "id-ID",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5faf7",
+  "theme_color": "#d1fae5",
+  "icons": [
+    {"src":"public/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"public/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
+}

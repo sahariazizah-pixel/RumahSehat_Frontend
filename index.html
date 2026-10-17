@@ -1,1 +1,51 @@
-a
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d1fae5">
+<meta name="description" content="Rumah Sehat — Atlas Terapi dan administrasi pasien">
+<title>Rumah Sehat | Klinik & Atlas Terapis</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="public/icon-192.png">
+<link rel="apple-touch-icon" href="public/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+<div class="app">
+<header class="header"><div class="brand"><div class="brand-icon"><i class="fa-solid fa-house-medical"></i></div><div><h1>Rumah Sehat</h1><p>Klinik &amp; Atlas Terapis</p></div></div><span class="status"><i></i> Siap</span></header>
+<main>
+<section id="tab-home" class="panel">
+<div class="welcome"><div class="doctor-icon"><i class="fa-solid fa-user-doctor"></i></div><div><small>Praktik Mandiri Terapis</small><h2>Klinik Rumah Sehat</h2><p><i class="fa-solid fa-location-dot"></i> Bulakamba, Brebes</p></div><i class="fa-solid fa-heart-pulse watermark"></i></div>
+<div class="section-title"><h2>Akses Menu Utama</h2><p>Pilih menu yang ingin dibuka</p></div>
+<div class="quick-grid"><button class="quick-card" data-tab="atlas"><i class="fa-solid fa-child-reaching quick-icon"></i><b>Atlas Anatomi</b><span>Koleksi titik terapi</span></button><button class="quick-card teal" data-tab="patients"><i class="fa-solid fa-users quick-icon"></i><b>Data Pasien</b><span>Catatan dan riwayat sesi</span></button></div>
+<div class="notice"><b><i class="fa-solid fa-circle-info"></i> Informasi aplikasi</b><p>Ini versi awal tampilan. Data Atlas tersimpan di browser perangkat ini. Login dan database online belum dihubungkan.</p></div>
+</section>
+<section id="tab-atlas" class="panel" hidden><div class="title-row"><div><h2>Atlas Titik Terapi</h2><p>Koleksi keilmuan dan catatan terapis</p></div><button id="add-atlas" class="primary"><i class="fa-solid fa-plus"></i> Tambah</button></div><div id="atlas-list" class="atlas-list"></div><p class="note">Catatan Atlas merupakan dokumentasi terapis, bukan pengganti nasihat tenaga kesehatan yang berwenang.</p></section>
+<section id="tab-patients" class="panel" hidden><div class="title-row"><div><h2>Manajemen Pasien</h2><p>Identitas ringan dan riwayat kunjungan</p></div></div><div class="empty"><i class="fa-solid fa-clipboard-user"></i><h3>Fitur pasien dibuat pada tahap berikutnya</h3><p>Kita akan menambahkan ID registrasi otomatis, nama, umur, alamat, keluhan, tindakan, perkembangan, dan riwayat sesi. Tidak menggunakan NIK atau nomor KK.</p></div></section>
+<section id="tab-settings" class="panel" hidden><div class="title-row"><div><h2>Profil &amp; Pengaturan</h2><p>Informasi aplikasi</p></div></div><div class="settings"><div class="settings-brand"><img src="public/icon-192.png" alt=""><div><b>Rumah Sehat</b><p>Asisten Praktik Terapis · Versi awal</p></div></div><p>Aplikasi untuk membantu pencatatan Atlas Terapi dan administrasi kunjungan pasien.</p><div class="setting-row"><span>Status database</span><b>Belum dihubungkan</b></div><div class="setting-row"><span>Telegram</span><b>Belum dihubungkan</b></div></div></section>
+</main>
+<nav class="bottom-nav" aria-label="Navigasi utama"><button class="nav-item active" data-tab="home"><i class="fa-solid fa-house"></i><span>Beranda</span></button><button class="nav-item" data-tab="atlas"><i class="fa-solid fa-child-reaching"></i><span>Atlas</span></button><button class="nav-item" data-tab="patients"><i class="fa-solid fa-users"></i><span>Pasien</span></button><button class="nav-item" data-tab="settings"><i class="fa-solid fa-circle-user"></i><span>Profil</span></button></nav>
+</div>
+<dialog id="atlas-dialog"><form id="atlas-form"><div class="dialog-head"><div><h2 id="dialog-title">Tambah Titik Atlas</h2><p>Isi nama dan catatan titik terapi.</p></div><button type="button" id="close-dialog" class="close" aria-label="Tutup">×</button></div><input type="hidden" id="edit-id"><label for="atlas-name">Nama titik / area</label><input id="atlas-name" required maxlength="100" placeholder="Contoh: Titik Al-Kahil"><label for="atlas-category">Kategori terapi (opsional)</label><select id="atlas-category"><option value="">Pilih kategori</option><option>Bekam Sunnah</option><option>Akupunktur</option><option>Akupresur / Pijat</option><option>Ruqyah &amp; Herbal</option><option>Lainnya</option></select><label for="atlas-desc">Catatan terapis</label><textarea id="atlas-desc" rows="4" required maxlength="1500" placeholder="Lokasi titik, pengalaman, atau referensi..."></textarea><p class="hint">Hindari klaim manfaat medis yang belum terverifikasi.</p><div class="dialog-actions"><button type="button" id="cancel-dialog" class="secondary">Batal</button><button type="submit" class="primary">Simpan</button></div></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+const tabIds=["home","atlas","patients","settings"];
+const showTab=id=>{tabIds.forEach(t=>document.getElementById("tab-"+t).hidden=t!==id);document.querySelectorAll(".nav-item").forEach(b=>{b.classList.toggle("active",b.dataset.tab===id);if(b.dataset.tab===id)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});if(id==="atlas")renderAtlas();window.scrollTo({top:0,behavior:"smooth"})};
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+const dlg=document.getElementById("atlas-dialog"), form=document.getElementById("atlas-form"), list=document.getElementById("atlas-list"), toast=document.getElementById("toast");let toastTimer;
+const getData=()=>{try{return JSON.parse(localStorage.getItem("rumahSehatAtlasV1")||"[]")}catch{return []}};
+const saveData=d=>localStorage.setItem("rumahSehatAtlasV1",JSON.stringify(d));
+function message(s){toast.textContent=s;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2500)}
+function renderAtlas(){list.replaceChildren();const data=getData();if(!data.length){const e=document.createElement("div");e.className="empty";e.innerHTML='<i class="fa-solid fa-book-medical"></i><h3>Atlas masih kosong</h3><p>Tekan Tambah untuk membuat catatan titik terapi.</p>';list.append(e);return}
+data.forEach(item=>{const card=document.createElement("article");card.className="atlas-card";const h=document.createElement("h3");h.textContent=item.name;const chip=document.createElement("span");chip.className="chip";chip.textContent=item.category||"Tanpa kategori";const p=document.createElement("p");p.textContent=item.desc;const actions=document.createElement("div");actions.className="actions";const edit=document.createElement("button");edit.className="text-button";edit.textContent="Edit";edit.onclick=()=>openDialog(item.id);const del=document.createElement("button");del.className="text-button danger";del.textContent="Hapus";del.onclick=()=>{if(confirm("Hapus catatan "+item.name+"?")){saveData(getData().filter(x=>x.id!==item.id));renderAtlas();message("Catatan dihapus.")}};actions.append(edit,del);card.append(h,chip,p,actions);list.append(card)})}
+function openDialog(id=""){form.reset();document.getElementById("edit-id").value=id;const item=getData().find(x=>x.id===id);document.getElementById("dialog-title").textContent=item?"Edit Titik Atlas":"Tambah Titik Atlas";document.getElementById("atlas-name").value=item?.name||"";document.getElementById("atlas-category").value=item?.category||"";document.getElementById("atlas-desc").value=item?.desc||"";dlg.showModal()}
+document.getElementById("add-atlas").onclick=()=>openDialog();
+["close-dialog","cancel-dialog"].forEach(id=>document.getElementById(id).onclick=()=>dlg.close());
+form.addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("edit-id").value,data=getData(),record={id:id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),name:document.getElementById("atlas-name").value.trim(),category:document.getElementById("atlas-category").value,desc:document.getElementById("atlas-desc").value.trim()};const i=data.findIndex(x=>x.id===id);if(i>=0)data[i]=record;else data.unshift(record);try{saveData(data);dlg.close();renderAtlas();message("Catatan disimpan di browser ini.")}catch{message("Penyimpanan browser tidak tersedia.")}});
+renderAtlas();
+</script>
+</body></html>
