@@ -85,6 +85,13 @@
       </div>
       <button id="add-atlas" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition"><i class="fa-solid fa-plus"></i> Tambah</button>
     </div>
+    <div class="space-y-2">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+        <input id="atlas-search" type="search" placeholder="Cari judul, indikasi, atau isi bacaan..." class="w-full border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-xs bg-gray-50 focus:outline-none focus:border-emerald-500 focus:bg-white">
+      </div>
+      <div id="atlas-filter-chips" class="flex gap-1.5 overflow-x-auto pb-1.5 -mx-1 px-1"></div>
+    </div>
     <div id="atlas-list" class="space-y-3">
       <div class="text-center py-8 text-gray-400 text-xs"><i class="fa-solid fa-spinner animate-spin text-base"></i> Memuat data dari Cloud...</div>
     </div>
@@ -313,20 +320,20 @@
 <form id="atlas-form" class="p-5 space-y-3 bg-white">
   <div class="flex justify-between items-start pb-2 border-b border-gray-100">
     <div>
-      <h2 id="dialog-title" class="font-bold text-base text-gray-800">Tambah Titik Atlas</h2>
-      <p class="text-xs text-gray-500">Isi nama, foto, dan catatan titik terapi.</p>
+      <h2 id="dialog-title" class="font-bold text-base text-gray-800">Tambah Materi Atlas</h2>
+      <p class="text-xs text-gray-500">Isi judul, kategori, indikasi, bacaan, dan foto pendukung.</p>
     </div>
     <button type="button" id="close-dialog" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">×</button>
   </div>
   <input type="hidden" id="edit-id">
   <input type="hidden" id="atlas-image-url">
   <div>
-    <label for="atlas-name" class="block text-xs font-semibold text-gray-700 mb-1">Nama titik / area</label>
+    <label for="atlas-name" class="block text-xs font-semibold text-gray-700 mb-1">Judul Materi / Titik</label>
     <input id="atlas-name" required maxlength="100" placeholder="Contoh: Titik Al-Kahil" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
   </div>
   <div>
-    <label for="atlas-category" class="block text-xs font-semibold text-gray-700 mb-1">Kategori terapi</label>
-    <select id="atlas-category" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 bg-white">
+    <label for="atlas-category" class="block text-xs font-semibold text-gray-700 mb-1">Kategori (otomatis dari Profil)</label>
+    <select id="atlas-category" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 bg-white">
       <option value="">Pilih kategori</option>
       <option>Bekam Sunnah</option>
       <option>Akupunktur</option>
@@ -336,13 +343,17 @@
     </select>
   </div>
   <div>
-    <label for="atlas-image-file" class="block text-xs font-semibold text-gray-700 mb-1">Foto Titik Terapi (Opsional)</label>
+    <label for="atlas-indications" class="block text-xs font-semibold text-gray-700 mb-1">Indikasi / Khasiat</label>
+    <textarea id="atlas-indications" rows="2" maxlength="600" placeholder="Contoh: meredakan sakit kepala, pegal di leher, masuk angin..." class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"></textarea>
+  </div>
+  <div>
+    <label for="atlas-image-file" class="block text-xs font-semibold text-gray-700 mb-1">Foto Gambar Anatomi / Pendukung (Opsional)</label>
     <input type="file" lang="id" id="atlas-image-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
     <div id="upload-status" class="text-[10px] text-emerald-600 mt-1 font-medium hidden">Mengupload foto ke Cloudinary...</div>
   </div>
   <div>
-    <label for="atlas-desc" class="block text-xs font-semibold text-gray-700 mb-1">Catatan terapis</label>
-    <textarea id="atlas-desc" rows="3" required maxlength="1500" placeholder="Lokasi titik atau referensi..." class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"></textarea>
+    <label for="atlas-desc" class="block text-xs font-semibold text-gray-700 mb-1">Teks Bacaan / Resep / Afirmasi / Prosedur</label>
+    <textarea id="atlas-desc" rows="5" required maxlength="4000" placeholder="Tulis langkah prosedur, bacaan, afirmasi, atau resep secara lengkap..." class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"></textarea>
   </div>
   <div class="flex justify-end space-x-2 pt-2">
     <button type="button" id="cancel-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
@@ -371,6 +382,47 @@
     <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
   </div>
 </form>
+</dialog>
+
+<!-- DIALOG DETAIL ATLAS (layar penuh) -->
+<dialog id="atlas-detail-dialog" class="p-0 m-0 rounded-none sm:rounded-2xl shadow-2xl w-full max-w-md h-full sm:h-[92vh] backdrop:bg-black/70 bg-white overflow-hidden">
+  <div class="flex flex-col h-full">
+    <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between bg-white/95 backdrop-blur">
+      <button id="close-detail" class="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500 text-sm"><i class="fa-solid fa-arrow-left"></i></button>
+      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Detail Atlas</span>
+      <button id="detail-delete" class="w-9 h-9 rounded-full hover:bg-rose-50 text-rose-500 text-sm"><i class="fa-solid fa-trash"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto">
+      <div id="detail-image-wrap" class="relative bg-gray-100">
+        <img id="detail-image" src="" alt="Foto anatomi" class="w-full max-h-72 object-cover cursor-zoom-in">
+        <span class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full"><i class="fa-solid fa-magnifying-glass-plus"></i> Klik foto untuk perbesar</span>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <span id="detail-category" class="text-[10px] bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-semibold border border-emerald-100"></span>
+          <span id="detail-date" class="text-[10px] text-gray-400 shrink-0"></span>
+        </div>
+        <h2 id="detail-title" class="font-bold text-lg text-gray-900 leading-snug"></h2>
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 space-y-1">
+          <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Indikasi &amp; Khasiat</span>
+          <p id="detail-indications-text" class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+        <div class="space-y-1 pt-1">
+          <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Bacaan / Resep / Afirmasi / Prosedur</span>
+          <p id="detail-text" class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+        <button id="detail-edit" class="mt-2 w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition"><i class="fa-solid fa-pen-to-square"></i> Edit Materi Ini</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- LIGHTBOX PRATINJAU GAMBAR LAYAR PENUH -->
+<dialog id="atlas-lightbox" class="p-0 m-0 w-full max-w-none rounded-none border-0 bg-transparent backdrop:bg-black/95">
+  <div class="w-[100vw] h-[100dvh] flex items-center justify-center relative">
+    <img id="lightbox-img" src="" alt="Pratinjau gambar" class="max-w-full max-h-full object-contain">
+    <button id="close-lightbox" class="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center text-base transition" aria-label="Tutup gambar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
 </dialog>
 
 <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-xl shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50"></div>
