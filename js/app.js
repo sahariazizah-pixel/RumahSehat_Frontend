@@ -28,6 +28,10 @@ window.showTab = function(id) {
     }
   });
 
+  if (id === "home") {
+    if (typeof window.loadHomeStats === "function") window.loadHomeStats();
+    if (typeof window.loadActivities === "function") window.loadActivities();
+  }
   if (id === "atlas" && typeof window.loadAtlas === "function") {
     window.loadAtlas();
   }
@@ -64,3 +68,5 @@ window.message = function(s) {
 if (typeof window.loadProfile === "function") window.loadProfile();
 if (typeof window.loadCategories === "function") window.loadCategories();
 if (typeof window.loadTelegramSettings === "function") window.loadTelegramSettings();
+if (typeof window.loadHomeStats === "function") window.loadHomeStats();
+if (typeof window.loadActivities === "function") window.loadActivities();
