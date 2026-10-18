@@ -208,6 +208,7 @@ function openLightbox(src) {
   img.src = src;
   lightboxDlg.showModal();
 }
+window.openLightbox = openLightbox;
 
 // ==================== FORM ATLAS (ADAPTIF) ====================
 function openAtlasDialog(item = null) {
