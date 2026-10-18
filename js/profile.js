@@ -449,6 +449,18 @@ async function sendTelegramNotification(messageText) {
     return false;
   }
 
+  // Validasi format token: contoh benar 8802888889:AAF7CYk...
+  if (!/^\d+:[A-Za-z0-9_-]+$/.test(botToken)) {
+    message("Format Bot Token tidak valid. Salin ulang token dari @BotFather (format: 123456789:AA...).");
+    return false;
+  }
+
+  // Validasi chat id: biasanya angka,
+  if (!/^-?\d+$/.test(chatId)) {
+    message("Format Chat ID tidak valid. Gunakan angka, contoh: 123456789.");
+    return false;
+  }
+
   try {
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     const res = await fetch(url, {
@@ -461,12 +473,21 @@ async function sendTelegramNotification(messageText) {
       return true;
     } else {
       console.error("Telegram API error:", json);
-      message("Gagal kirim: Pastikan Anda sudah menekan /start di ruang obrolan Bot Telegram Anda");
+      const desc = json.description || "Tidak diketahui";
+      if (json.error_code === 401) {
+        message(`Gagal (Token salah): ${desc}. Buat ulang token di @BotFather (mybots > API Token).`);
+      } else if (String(desc).includes("chat not found")) {
+        message("Gagal (Chat tidak ditemukan): Chat ID salah ATAU Anda belum menekan /start pada bot tersebut.");
+      } else if (String(desc).includes("user is deactivated")) {
+        message("Gagal: akun bot/token sudah tidak berlaku. Buat bot baru di @BotFather.");
+      } else {
+        message(`Gagal kirim (${json.error_code}): ${desc}`);
+      }
       return false;
     }
   } catch (err) {
     console.error("Telegram send error:", err);
-    message("Gagal mengirim notifikasi. Periksa koneksi internet.");
+    message("Gagal mengirim notifikasi. Periksa koneksi internet / matikan blokir iklan pada browser (memikat fetch). Error: " + err.message);
     return false;
   }
 }
