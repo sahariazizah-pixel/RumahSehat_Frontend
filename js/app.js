@@ -70,3 +70,12 @@ if (typeof window.loadCategories === "function") window.loadCategories();
 if (typeof window.loadTelegramSettings === "function") window.loadTelegramSettings();
 if (typeof window.loadHomeStats === "function") window.loadHomeStats();
 if (typeof window.loadActivities === "function") window.loadActivities();
+
+// Hide splash screen after startup
+setTimeout(() => {
+  const splash = document.getElementById("app-splash-screen");
+  if (splash) {
+    splash.classList.add("opacity-0", "pointer-events-none");
+    setTimeout(() => splash.remove(), 500);
+  }
+}, 1200);
