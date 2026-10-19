@@ -71,10 +71,24 @@ async function loadProfile() {
       if (vFacebook) vFacebook.textContent = p.facebook || "-";
 
       const vAvatar = document.getElementById("view-profile-avatar");
-      if (vAvatar && p.avatarUrl) vAvatar.src = p.avatarUrl;
+      if (vAvatar) {
+        if (p.avatarUrl) vAvatar.src = p.avatarUrl;
+        vAvatar.classList.add("cursor-pointer", "hover:opacity-95", "transition");
+        vAvatar.onclick = () => {
+          const src = p.avatarUrl || vAvatar.src;
+          if (src && typeof window.openLightbox === "function") window.openLightbox(src);
+        };
+      }
 
       const vCover = document.getElementById("view-cover-banner");
-      if (vCover && p.coverUrl) vCover.style.backgroundImage = `url('${p.coverUrl}')`;
+      if (vCover) {
+        if (p.coverUrl) vCover.style.backgroundImage = `url('${p.coverUrl}')`;
+        vCover.classList.add("cursor-pointer", "hover:opacity-95", "transition");
+        vCover.onclick = () => {
+          const src = p.coverUrl;
+          if (src && typeof window.openLightbox === "function") window.openLightbox(src);
+        };
+      }
 
       const headerLogo = document.getElementById("header-app-logo");
       if (headerLogo && p.logoUrl) headerLogo.src = p.logoUrl;
