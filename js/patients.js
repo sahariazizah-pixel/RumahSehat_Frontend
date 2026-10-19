@@ -255,6 +255,13 @@ if (patientForm) {
           updatedAt: serverTimestamp()
         });
         message("Pasien baru berhasil didaftarkan!");
+
+        // Kirim notifikasi Telegram secara asinkron (non-blocking)
+        if (typeof window.sendTelegramNotification === "function") {
+          window.sendTelegramNotification(
+            `<b>[RUMAH SEHAT] Pasien Baru Registered</b>\n\nData pasien baru atas nama <b>${escapeHtml(name)}</b> (Kode: ${regId}) telah tersimpan di Cloud Database.\n\nSilakan pilih Edit atau Hapus pada aplikasi untuk penyesuaian data.`
+          ).catch(console.error);
+        }
       }
 
       if (patientDlg) patientDlg.close();
@@ -530,6 +537,14 @@ if (sessionForm) {
       }
 
       message("Sesi penanganan berhasil disimpan!");
+
+      // Kirim notifikasi Telegram secara asinkron (non-blocking)
+      if (typeof window.sendTelegramNotification === "function") {
+        window.sendTelegramNotification(
+          `<b>[RUMAH SEHAT] Sesi Penanganan Pasien</b>\n\nPenanganan ${escapeHtml(stage)} untuk pasien <b>${escapeHtml(currentPatient.name)}</b> dengan metode <b>${escapeHtml(method)}</b> telah berhasil dicatat.\n\nSilakan buka aplikasi untuk melihat rekam medis lengkap.`
+        ).catch(console.error);
+      }
+
       if (sessionDlg) sessionDlg.close();
 
       // Refresh tampilan rekam medis & daftar pasien

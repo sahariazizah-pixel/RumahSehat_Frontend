@@ -395,12 +395,14 @@ async function loadTelegramSettings() {
   try {
     const docRef = doc(db, "settings", "telegram");
     const docSnap = await getDoc(docRef);
+    const tokenInput = document.getElementById("input-telegram-token");
+    const chatInput = document.getElementById("input-telegram-chatid");
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const tokenInput = document.getElementById("input-telegram-token");
-      const chatInput = document.getElementById("input-telegram-chatid");
-      if (tokenInput) tokenInput.value = data.botToken || "";
+      if (tokenInput) tokenInput.value = data.botToken || "8802888889:AAF7CYk...";
       if (chatInput) chatInput.value = data.chatId || "";
+    } else {
+      if (tokenInput && !tokenInput.value) tokenInput.value = "8802888889:AAF7CYk...";
     }
   } catch (err) {
     console.error("Load telegram settings error:", err);
@@ -412,7 +414,7 @@ const telegramForm = document.getElementById("telegram-settings-form");
 if (telegramForm) {
   telegramForm.addEventListener("submit", async e => {
     e.preventDefault();
-    const botToken = document.getElementById("input-telegram-token").value.trim();
+    const botToken = document.getElementById("input-telegram-token")?.value.trim() || "8802888889:AAF7CYk...";
     const chatId = document.getElementById("input-telegram-chatid").value.trim();
     try {
       await setDoc(doc(db, "settings", "telegram"), { botToken, chatId, updatedAt: serverTimestamp() });
@@ -425,15 +427,15 @@ if (telegramForm) {
 }
 
 async function sendTelegramNotification(messageText) {
-  let botToken = document.getElementById("input-telegram-token")?.value.trim();
+  let botToken = document.getElementById("input-telegram-token")?.value.trim() || "8802888889:AAF7CYk...";
   let chatId = document.getElementById("input-telegram-chatid")?.value.trim();
 
-  if (!botToken || !chatId) {
+  if (!chatId) {
     try {
       const docSnap = await getDoc(doc(db, "settings", "telegram"));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        botToken = botToken || data.botToken;
+        botToken = botToken || data.botToken || "8802888889:AAF7CYk...";
         chatId = chatId || data.chatId;
       }
     } catch (e) { console.error(e); }

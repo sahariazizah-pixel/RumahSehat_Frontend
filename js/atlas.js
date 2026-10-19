@@ -289,6 +289,13 @@ if (atlasForm) {
       } else {
         await addDoc(collection(db, "atlas"), { name, category, desc, indications, imageUrl, createdAt: serverTimestamp() });
         message("Materi baru disimpan.");
+
+        // Kirim notifikasi Telegram secara asinkron (non-blocking)
+        if (typeof window.sendTelegramNotification === "function") {
+          window.sendTelegramNotification(
+            `<b>[RUMAH SEHAT] Atlas Terapi Baru</b>\n\nCatatan atlas baru: <b>${escapeHtml(name)}</b> (Kategori: ${escapeHtml(category)}) telah ditambahkan ke pustaka keilmuan.`
+          ).catch(console.error);
+        }
       }
       if (atlasDlg) atlasDlg.close();
       window.loadAtlas();
@@ -300,4 +307,14 @@ if (atlasForm) {
       if (uploadStatus) uploadStatus.classList.add("hidden");
     }
   });
+}
+
+// Helper XSS escape
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
