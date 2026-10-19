@@ -5,6 +5,14 @@ import { db } from "./firebase-config.js";
 
 const message = (s) => window.message(s);
 
+function showSuccessModal(title, desc, onOk) {
+  if (typeof window.showSuccessModal === "function") {
+    window.showSuccessModal(title, desc, onOk);
+  } else if (typeof onOk === "function") {
+    onOk();
+  }
+}
+
 // ==================== UTILS ====================
 function getTodayString() {
   const now = new Date();
@@ -476,7 +484,10 @@ if (activityForm) {
           photos: finalPhotoUrls,
           updatedAt: serverTimestamp()
         });
-        message("Kegiatan berhasil diperbarui!");
+        showSuccessModal("Berhasil!", "Kegiatan berhasil diperbarui!", () => {
+          if (activityDlg) activityDlg.close();
+          loadActivities();
+        });
       } else {
         await addDoc(collection(db, "activities"), {
           title,
@@ -486,11 +497,11 @@ if (activityForm) {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        message("Kegiatan berhasil diposting!");
+        showSuccessModal("Berhasil!", "Kegiatan berhasil diposting!", () => {
+          if (activityDlg) activityDlg.close();
+          loadActivities();
+        });
       }
-
-      if (activityDlg) activityDlg.close();
-      loadActivities();
     } catch (err) {
       console.error("Gagal menyimpan kegiatan:", err);
       message("Gagal menyimpan kegiatan. Periksa koneksi.");

@@ -21,6 +21,14 @@ const sessionDlg = document.getElementById("session-dialog");
 const sessionForm = document.getElementById("session-form");
 
 // ==================== UTILS ====================
+function showSuccessModal(title, desc, onOk) {
+  if (typeof window.showSuccessModal === "function") {
+    window.showSuccessModal(title, desc, onOk);
+  } else if (typeof onOk === "function") {
+    onOk();
+  }
+}
+
 function getTodayString() {
   const now = new Date();
   const y = now.getFullYear();
@@ -176,10 +184,53 @@ if (patientsSearchEl) {
   });
 }
 
+// Patient photo input preview & handler
+let currentPatientPhotoFile = null;
+const patientPhotoFileEl = document.getElementById("patient-photo-file");
+if (patientPhotoFileEl) {
+  patientPhotoFileEl.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    currentPatientPhotoFile = file;
+    const preview = document.getElementById("patient-photo-preview");
+    const previewWrap = document.getElementById("patient-photo-preview-wrap");
+    if (preview && previewWrap) {
+      preview.src = URL.createObjectURL(file);
+      previewWrap.classList.remove("hidden");
+    }
+  });
+}
+
+const patientRemovePhotoBtn = document.getElementById("patient-remove-photo-btn");
+if (patientRemovePhotoBtn) {
+  patientRemovePhotoBtn.onclick = () => {
+    currentPatientPhotoFile = null;
+    if (patientPhotoFileEl) patientPhotoFileEl.value = "";
+    const urlInput = document.getElementById("patient-photo-url");
+    if (urlInput) urlInput.value = "";
+    const previewWrap = document.getElementById("patient-photo-preview-wrap");
+    if (previewWrap) previewWrap.classList.add("hidden");
+  };
+}
+
+const sessionRemovePhotoBtn = document.getElementById("session-remove-photo-btn");
+if (sessionRemovePhotoBtn) {
+  sessionRemovePhotoBtn.onclick = () => {
+    currentSessionPhotoFile = null;
+    const fileEl = document.getElementById("session-photo-file");
+    if (fileEl) fileEl.value = "";
+    const urlInput = document.getElementById("session-photo-url");
+    if (urlInput) urlInput.value = "";
+    const previewWrap = document.getElementById("session-photo-preview-wrap");
+    if (previewWrap) previewWrap.classList.add("hidden");
+  };
+}
+
 // ==================== PATIENT DIALOG (ADD / EDIT) ====================
 function openPatientDialog(patient = null) {
   if (!patientForm) return;
   patientForm.reset();
+  currentPatientPhotoFile = null;
 
   const idInput = document.getElementById("patient-id");
   const nameInput = document.getElementById("patient-name");
@@ -188,6 +239,19 @@ function openPatientDialog(patient = null) {
   const addressInput = document.getElementById("patient-address");
   const complaintInput = document.getElementById("patient-complaint");
   const dialogTitle = document.getElementById("patient-dialog-title");
+  const photoUrlInput = document.getElementById("patient-photo-url");
+  const photoPreview = document.getElementById("patient-photo-preview");
+  const photoPreviewWrap = document.getElementById("patient-photo-preview-wrap");
+  const photoFileEl = document.getElementById("patient-photo-file");
+
+  if (photoFileEl) photoFileEl.value = "";
+  if (photoUrlInput) photoUrlInput.value = patient ? (patient.photoUrl || "") : "";
+  if (patient && patient.photoUrl && photoPreview && photoPreviewWrap) {
+    photoPreview.src = patient.photoUrl;
+    photoPreviewWrap.classList.remove("hidden");
+  } else if (photoPreviewWrap) {
+    photoPreviewWrap.classList.add("hidden");
+  }
 
   if (idInput) idInput.value = patient ? patient.id : "";
   if (nameInput) nameInput.value = patient ? (patient.name || "") : "";
@@ -222,6 +286,7 @@ if (patientForm) {
     const age = document.getElementById("patient-age")?.value.trim();
     const address = document.getElementById("patient-address")?.value.trim();
     const complaint = document.getElementById("patient-complaint")?.value.trim();
+    const uploadStatus = document.getElementById("patient-upload-status");
 
     if (!name) {
       message("Nama pasien wajib diisi.");
@@ -229,6 +294,28 @@ if (patientForm) {
     }
 
     try {
+      let photoUrl = document.getElementById("patient-photo-url")?.value || "";
+
+      if (currentPatientPhotoFile) {
+        if (uploadStatus) {
+          uploadStatus.textContent = "Mengunggah foto pasien...";
+          uploadStatus.classList.remove("hidden");
+        }
+        const formData = new FormData();
+        formData.append("file", currentPatientPhotoFile);
+        formData.append("upload_preset", "rumahsehat_asset");
+
+        const res = await fetch("https://api.cloudinary.com/v1_1/u8fb8blx/image/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (data && data.secure_url) {
+          photoUrl = data.secure_url;
+        }
+        if (uploadStatus) uploadStatus.classList.add("hidden");
+      }
+
       if (id) {
         // Edit
         await updateDoc(doc(db, "patients", id), {
@@ -237,11 +324,23 @@ if (patientForm) {
           age,
           address,
           complaint,
+          photoUrl,
           updatedAt: serverTimestamp()
         });
-        message("Data pasien berhasil diperbarui!");
+
+        showSuccessModal("Berhasil!", "Data pasien berhasil diperbarui!", () => {
+          if (patientDlg) patientDlg.close();
+          loadPatients();
+          if (currentPatient && id === currentPatient.id) {
+            getDocs(query(collection(db, "patients"), orderBy("createdAt", "desc"))).then(updatedSnap => {
+              const found = updatedSnap.docs.find(d => d.id === id);
+              if (found) {
+                openPatientDetail({ id: found.id, ...found.data() });
+              }
+            });
+          }
+        });
       } else {
-        // Tambah baru dengan regId otomatis (e.g. REG- + timestamp/random or count)
         const regId = `REG-${String(patientsList.length + 1).padStart(3, "0")}`;
         await addDoc(collection(db, "patients"), {
           regId,
@@ -250,29 +349,22 @@ if (patientForm) {
           age,
           address,
           complaint,
+          photoUrl,
           sessions: [],
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        message("Pasien baru berhasil didaftarkan!");
 
-        // Kirim notifikasi Telegram secara asinkron (non-blocking)
         if (typeof window.sendTelegramNotification === "function") {
           window.sendTelegramNotification(
             `<b>[RUMAH SEHAT] Pasien Baru Registered</b>\n\nData pasien baru atas nama <b>${escapeHtml(name)}</b> (Kode: ${regId}) telah tersimpan di Cloud Database.\n\nSilakan pilih Edit atau Hapus pada aplikasi untuk penyesuaian data.`
           ).catch(console.error);
         }
-      }
 
-      if (patientDlg) patientDlg.close();
-      loadPatients();
-      if (currentPatient && id === currentPatient.id) {
-        // Refresh detail jika sedang dibuka
-        const updatedSnap = await getDocs(query(collection(db, "patients"), orderBy("createdAt", "desc")));
-        const found = updatedSnap.docs.find(d => d.id === id);
-        if (found) {
-          openPatientDetail({ id: found.id, ...found.data() });
-        }
+        showSuccessModal("Berhasil!", "Pasien baru berhasil didaftarkan!", () => {
+          if (patientDlg) patientDlg.close();
+          loadPatients();
+        });
       }
     } catch (err) {
       console.error("Gagal menyimpan pasien:", err);
@@ -536,20 +628,20 @@ if (sessionForm) {
         }
       }
 
-      message("Sesi penanganan berhasil disimpan!");
+      showSuccessModal("Berhasil!", "Sesi penanganan berhasil disimpan!", () => {
+        // Kirim notifikasi Telegram secara asinkron (non-blocking)
+        if (typeof window.sendTelegramNotification === "function") {
+          window.sendTelegramNotification(
+            `<b>[RUMAH SEHAT] Sesi Penanganan Pasien</b>\n\nPenanganan ${escapeHtml(stage)} untuk pasien <b>${escapeHtml(currentPatient.name)}</b> dengan metode <b>${escapeHtml(method)}</b> telah berhasil dicatat.\n\nSilakan buka aplikasi untuk melihat rekam medis lengkap.`
+          ).catch(console.error);
+        }
 
-      // Kirim notifikasi Telegram secara asinkron (non-blocking)
-      if (typeof window.sendTelegramNotification === "function") {
-        window.sendTelegramNotification(
-          `<b>[RUMAH SEHAT] Sesi Penanganan Pasien</b>\n\nPenanganan ${escapeHtml(stage)} untuk pasien <b>${escapeHtml(currentPatient.name)}</b> dengan metode <b>${escapeHtml(method)}</b> telah berhasil dicatat.\n\nSilakan buka aplikasi untuk melihat rekam medis lengkap.`
-        ).catch(console.error);
-      }
+        if (sessionDlg) sessionDlg.close();
 
-      if (sessionDlg) sessionDlg.close();
-
-      // Refresh tampilan rekam medis & daftar pasien
-      openPatientDetail(currentPatient);
-      loadPatients();
+        // Refresh tampilan rekam medis & daftar pasien
+        openPatientDetail(currentPatient);
+        loadPatients();
+      });
 
     } catch (err) {
       console.error("Gagal menyimpan sesi penanganan:", err);

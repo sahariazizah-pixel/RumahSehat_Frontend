@@ -4,6 +4,14 @@ import { db } from "./firebase-config.js";
 
 const message = (s) => window.message(s);
 
+function showSuccessModal(title, desc, onOk) {
+  if (typeof window.showSuccessModal === "function") {
+    window.showSuccessModal(title, desc, onOk);
+  } else if (typeof onOk === "function") {
+    onOk();
+  }
+}
+
 // ==================== PROFILE FUNCTIONS ====================
 const profileDlg = document.getElementById("profile-dialog");
 const profileForm = document.getElementById("profile-form");
@@ -228,9 +236,10 @@ if (profileForm) {
 
     try {
       await setDoc(doc(db, "settings", "profile"), profileData);
-      message("Profil berhasil diperbarui!");
-      if (profileDlg) profileDlg.close();
-      loadProfile();
+      showSuccessModal("Berhasil!", "Profil berhasil diperbarui!", () => {
+        if (profileDlg) profileDlg.close();
+        loadProfile();
+      });
     } catch (err) {
       message("Gagal menyimpan profil.");
       console.error(err);
@@ -364,10 +373,11 @@ if (categoryForm) {
 
     try {
       await setDoc(doc(db, "settings", "categories"), { categories: currentCategories });
-      if (categoryDlg) categoryDlg.close();
-      renderCategoriesList();
-      populateCategoryDropdowns();
-      message("Kategori berhasil disimpan.");
+      showSuccessModal("Berhasil!", "Kategori berhasil disimpan.", () => {
+        if (categoryDlg) categoryDlg.close();
+        renderCategoriesList();
+        populateCategoryDropdowns();
+      });
     } catch (err) {
       console.error("Save category error:", err);
       message("Gagal menyimpan kategori.");
@@ -418,7 +428,7 @@ if (telegramForm) {
     const chatId = document.getElementById("input-telegram-chatid").value.trim();
     try {
       await setDoc(doc(db, "settings", "telegram"), { botToken, chatId, updatedAt: serverTimestamp() });
-      message("Pengaturan Telegram berhasil disimpan!");
+      showSuccessModal("Berhasil!", "Pengaturan Telegram berhasil disimpan!", () => {});
     } catch (err) {
       console.error("Save telegram error:", err);
       message("Gagal menyimpan pengaturan Telegram.");

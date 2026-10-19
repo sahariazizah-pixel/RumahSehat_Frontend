@@ -67,6 +67,38 @@ window.message = function(s) {
   window.toastTimer = setTimeout(() => toast.classList.add("opacity-0"), 2500);
 };
 
+window.showSuccessModal = function(title, desc, onOk = null) {
+  const modal = document.getElementById("success-modal");
+  const titleEl = document.getElementById("success-modal-title");
+  const descEl = document.getElementById("success-modal-desc");
+  const okBtn = document.getElementById("success-modal-ok-btn");
+
+  if (titleEl) titleEl.textContent = title || "Berhasil!";
+  if (descEl) descEl.textContent = desc || "Data berhasil disimpan ke sistem.";
+
+  if (modal) {
+    if (typeof modal.showModal === "function") {
+      modal.showModal();
+    } else {
+      modal.classList.remove("hidden");
+    }
+
+    const handleOk = () => {
+      if (typeof modal.close === "function") {
+        modal.close();
+      } else {
+        modal.classList.add("hidden");
+      }
+      okBtn.removeEventListener("click", handleOk);
+      if (typeof onOk === "function") onOk();
+    };
+
+    okBtn.onclick = handleOk;
+  } else if (typeof onOk === "function") {
+    onOk();
+  }
+};
+
 // Initial Startup
 if (typeof window.loadProfile === "function") window.loadProfile();
 if (typeof window.loadCategories === "function") window.loadCategories();

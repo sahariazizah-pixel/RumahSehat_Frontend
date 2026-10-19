@@ -5,6 +5,14 @@ import { db } from "./firebase-config.js";
 
 const message = (s) => window.message(s);
 
+function showSuccessModal(title, desc, onOk) {
+  if (typeof window.showSuccessModal === "function") {
+    window.showSuccessModal(title, desc, onOk);
+  } else if (typeof onOk === "function") {
+    onOk();
+  }
+}
+
 // ==================== STATE ====================
 let atlasItems = [];
 let activeCategory = "";   // "" = Semua
@@ -285,10 +293,12 @@ if (atlasForm) {
       // Data terurut terbaru: createdAt diisi hanya saat membuat dokumen baru
       if (id) {
         await updateDoc(doc(db, "atlas", id), { name, category, desc, indications, imageUrl });
-        message("Materi diperbarui.");
+        showSuccessModal("Berhasil!", "Materi atlas berhasil diperbarui.", () => {
+          if (atlasDlg) atlasDlg.close();
+          window.loadAtlas();
+        });
       } else {
         await addDoc(collection(db, "atlas"), { name, category, desc, indications, imageUrl, createdAt: serverTimestamp() });
-        message("Materi baru disimpan.");
 
         // Kirim notifikasi Telegram secara asinkron (non-blocking)
         if (typeof window.sendTelegramNotification === "function") {
@@ -296,9 +306,12 @@ if (atlasForm) {
             `<b>[RUMAH SEHAT] Atlas Terapi Baru</b>\n\nCatatan atlas baru: <b>${escapeHtml(name)}</b> (Kategori: ${escapeHtml(category)}) telah ditambahkan ke pustaka keilmuan.`
           ).catch(console.error);
         }
+
+        showSuccessModal("Berhasil!", "Materi atlas baru berhasil disimpan.", () => {
+          if (atlasDlg) atlasDlg.close();
+          window.loadAtlas();
+        });
       }
-      if (atlasDlg) atlasDlg.close();
-      window.loadAtlas();
     } catch (err) {
       console.error(err);
       message("Gagal menyimpan.");
