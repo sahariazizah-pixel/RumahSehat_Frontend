@@ -156,14 +156,23 @@
 
   <!-- TAB PATIENTS -->
   <section id="tab-patients" class="space-y-4" hidden>
-    <div>
-      <h2 class="font-bold text-gray-800 text-lg">Manajemen Pasien</h2>
-      <p class="text-xs text-gray-500">Identitas ringan dan riwayat kunjungan</p>
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="font-bold text-gray-800 text-lg">Manajemen Pasien</h2>
+        <p class="text-xs text-gray-500">Identitas ringan dan riwayat kunjungan</p>
+      </div>
+      <button id="add-patient-btn" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-md flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-plus"></i> Tambah Pasien
+      </button>
     </div>
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 text-center space-y-3 shadow-sm">
-      <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-clipboard-user"></i></div>
-      <h3 class="font-bold text-gray-800 text-sm">Fitur pasien disiapkan pada tahap berikutnya</h3>
-      <p class="text-xs text-gray-500 leading-relaxed">Kita akan menambahkan ID registrasi otomatis, nama, keluhan, tindakan, serta riwayat sesi kunjungan pasien.</p>
+    <div class="space-y-2">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+        <input id="patients-search" type="search" placeholder="Cari nama pasien, no HP, atau keluhan..." class="w-full border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 text-xs bg-gray-50 focus:outline-none focus:border-emerald-500 focus:bg-white">
+      </div>
+    </div>
+    <div id="patients-list" class="space-y-3">
+      <div class="text-center py-8 text-gray-400 text-xs"><i class="fa-solid fa-spinner animate-spin text-base"></i> Memuat data pasien...</div>
     </div>
   </section>
 
@@ -477,6 +486,162 @@
   <div class="flex justify-end space-x-2 pt-2">
     <button type="button" id="cancel-activity-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
     <button type="submit" id="save-activity-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
+  </div>
+</form>
+</dialog>
+
+<!-- DIALOG FORM PASIEN -->
+<dialog id="patient-dialog" class="p-0 rounded-2xl shadow-2xl max-w-sm w-11/12 backdrop:bg-black/50">
+<form id="patient-form" class="p-5 space-y-3 bg-white">
+  <div class="flex justify-between items-start pb-2 border-b border-gray-100">
+    <div>
+      <h2 id="patient-dialog-title" class="font-bold text-base text-gray-800">Tambah Pasien</h2>
+      <p class="text-xs text-gray-500">Masukkan identitas dan keluhan awal pasien.</p>
+    </div>
+    <button type="button" id="close-patient-dialog" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">×</button>
+  </div>
+  <input type="hidden" id="patient-id">
+  <div>
+    <label for="patient-name" class="block text-xs font-semibold text-gray-700 mb-1">Nama Lengkap Pasien</label>
+    <input id="patient-name" required maxlength="100" placeholder="Contoh: Budi Santoso" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+  </div>
+  <div class="grid grid-cols-2 gap-2">
+    <div>
+      <label for="patient-phone" class="block text-xs font-semibold text-gray-700 mb-1">No. HP / WA</label>
+      <input id="patient-phone" placeholder="08xxxxxxxxxx" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+    <div>
+      <label for="patient-age" class="block text-xs font-semibold text-gray-700 mb-1">Usia / Jenis Kelamin</label>
+      <input id="patient-age" placeholder="Contoh: 45 Th / L" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+    </div>
+  </div>
+  <div>
+    <label for="patient-address" class="block text-xs font-semibold text-gray-700 mb-1">Alamat</label>
+    <input id="patient-address" placeholder="Contoh: Bulakamba, Brebes" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500">
+  </div>
+  <div>
+    <label for="patient-complaint" class="block text-xs font-semibold text-gray-700 mb-1">Keluhan Utama / Riwayat Singkat</label>
+    <textarea id="patient-complaint" rows="3" maxlength="500" placeholder="Contoh: Sering pusing, nyeri tengkuk dan pundak..." class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"></textarea>
+  </div>
+  <div class="flex justify-end space-x-2 pt-2">
+    <button type="button" id="cancel-patient-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
+    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan</button>
+  </div>
+</form>
+</dialog>
+
+<!-- DIALOG DETAIL / REKAM MEDIS PASIEN (layar penuh) -->
+<dialog id="patient-detail-dialog" class="p-0 m-0 rounded-none sm:rounded-2xl shadow-2xl w-full max-w-md h-full sm:h-[92vh] backdrop:bg-black/70 bg-white overflow-hidden">
+  <div class="flex flex-col h-full">
+    <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between bg-white/95 backdrop-blur">
+      <button id="close-patient-detail" class="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500 text-sm"><i class="fa-solid fa-arrow-left"></i></button>
+      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rekam Medis Pasien</span>
+      <div class="flex gap-1">
+        <button id="edit-patient-btn" class="w-9 h-9 rounded-full hover:bg-emerald-50 text-emerald-600 text-sm" title="Edit Pasien"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button id="delete-patient-btn" class="w-9 h-9 rounded-full hover:bg-rose-50 text-rose-500 text-sm" title="Hapus Pasien"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <!-- Identitas Pasien -->
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-4 shadow-sm space-y-2">
+        <div class="flex justify-between items-start">
+          <div>
+            <span id="detail-patient-id" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">REG-001</span>
+            <h2 id="detail-patient-name" class="font-bold text-lg mt-1">Nama Pasien</h2>
+          </div>
+          <span id="detail-patient-age" class="text-xs bg-white/10 px-2.5 py-1 rounded-xl">45 Th / L</span>
+        </div>
+        <div class="text-xs text-emerald-100 space-y-1 pt-1 border-t border-white/15">
+          <p class="flex items-center gap-1.5"><i class="fa-solid fa-phone"></i> <span id="detail-patient-phone">-</span></p>
+          <p class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> <span id="detail-patient-address">-</span></p>
+        </div>
+        <div class="bg-black/10 rounded-xl p-2.5 text-xs">
+          <span class="text-[10px] uppercase font-bold text-emerald-200 block mb-0.5">Keluhan Utama:</span>
+          <p id="detail-patient-complaint" class="text-emerald-50 leading-relaxed">-</p>
+        </div>
+      </div>
+
+      <!-- Riwayat Sesi Penanganan -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-gray-800 text-sm">Riwayat Sesi Penanganan</h3>
+            <p class="text-[11px] text-gray-500">Catatan perkembangan terapi &amp; kunjungan</p>
+          </div>
+          <button id="add-session-btn" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow flex items-center gap-1 transition">
+            <i class="fa-solid fa-plus"></i> Tambah Sesi
+          </button>
+        </div>
+        <div id="patient-sessions-list" class="space-y-3">
+          <!-- List sesi kunjungan pasien -->
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- DIALOG FORM SESI PENANGANAN PASIEN -->
+<dialog id="session-dialog" class="p-0 rounded-2xl shadow-2xl max-w-sm w-11/12 backdrop:bg-black/50">
+<form id="session-form" class="p-5 space-y-3 bg-white max-h-[85vh] overflow-y-auto">
+  <div class="flex justify-between items-start pb-2 border-b border-gray-100 sticky top-0 bg-white z-10">
+    <div>
+      <h2 id="session-dialog-title" class="font-bold text-base text-gray-800">+ Tambah Sesi Penanganan Pasien</h2>
+      <p class="text-xs text-gray-500">Catat tahap, metode, foto, dan catatan penanganan.</p>
+    </div>
+    <button type="button" id="close-session-dialog" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">×</button>
+  </div>
+  <input type="hidden" id="session-patient-id">
+  <input type="hidden" id="session-index">
+  <input type="hidden" id="session-photo-url">
+
+  <div class="grid grid-cols-2 gap-2">
+    <div>
+      <label for="session-stage" class="block text-xs font-semibold text-gray-700 mb-1">Tahap Sesi</label>
+      <input id="session-stage" required placeholder="Contoh: Sesi 1 / Kontrol" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500" value="Sesi 1">
+    </div>
+    <div>
+      <label for="session-date" class="block text-xs font-semibold text-gray-700 mb-1">Tanggal Sesi</label>
+      <input type="date" id="session-date" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 bg-white">
+    </div>
+  </div>
+
+  <div>
+    <label for="session-method" class="block text-xs font-semibold text-gray-700 mb-1">Metode Terapi</label>
+    <select id="session-method" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 bg-white">
+      <option value="">Pilih metode terapi</option>
+      <option>Bekam Sunnah</option>
+      <option>Akupunktur</option>
+      <option>Akupresur / Pijat</option>
+      <option>Ruqyah &amp; Herbal</option>
+      <option>Lainnya</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="session-photo-file" class="block text-xs font-semibold text-gray-700 mb-1">Foto Penanganan (Opsional)</label>
+    <input type="file" lang="id" id="session-photo-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+    <div id="session-photo-preview-wrap" class="mt-2 hidden">
+      <img id="session-photo-preview" src="" alt="Pratinjau" class="w-full h-36 object-cover rounded-xl border border-gray-200">
+    </div>
+    <div id="session-upload-status" class="text-[10px] text-emerald-600 mt-1 font-medium hidden">Mengupload foto penanganan ke Cloudinary...</div>
+  </div>
+
+  <div>
+    <label for="session-notes" class="block text-xs font-semibold text-gray-700 mb-1">Catatan / Ringkasan Penanganan</label>
+    <textarea id="session-notes" rows="3" maxlength="1000" placeholder="Tulis hasil pemeriksaan, titik bekam/akupunktur, atau reaksi pasien..." class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"></textarea>
+  </div>
+
+  <!-- Opsi Posting ke Beranda -->
+  <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2.5">
+    <input type="checkbox" id="session-post-home" class="mt-0.5 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer">
+    <label for="session-post-home" class="text-xs text-emerald-900 font-semibold cursor-pointer leading-relaxed">
+      Posting foto &amp; ringkasan penanganan ini ke Beranda / Kegiatan Kegiatan
+    </label>
+  </div>
+
+  <div class="flex justify-end space-x-2 pt-2">
+    <button type="button" id="cancel-session-dialog" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50">Batal</button>
+    <button type="submit" id="save-session-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow">Simpan Sesi</button>
   </div>
 </form>
 </dialog>
