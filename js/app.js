@@ -35,6 +35,9 @@ window.showTab = function(id) {
   if (id === "atlas" && typeof window.loadAtlas === "function") {
     window.loadAtlas();
   }
+  if (id === "patients" && typeof window.loadPatients === "function") {
+    window.loadPatients();
+  }
   if (id === "settings") {
     if (typeof window.loadProfile === "function") window.loadProfile();
     if (typeof window.loadCategories === "function") window.loadCategories();
@@ -70,6 +73,7 @@ if (typeof window.loadCategories === "function") window.loadCategories();
 if (typeof window.loadTelegramSettings === "function") window.loadTelegramSettings();
 if (typeof window.loadHomeStats === "function") window.loadHomeStats();
 if (typeof window.loadActivities === "function") window.loadActivities();
+if (typeof window.loadPatients === "function") window.loadPatients();
 
 // Hide splash screen after startup
 setTimeout(() => {
