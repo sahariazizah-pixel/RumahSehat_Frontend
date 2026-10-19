@@ -127,12 +127,59 @@ async function loadProfile() {
 }
 window.loadProfile = loadProfile;
 
+function setPreview(prefix, url) {
+  const preview = document.getElementById(`${prefix}-preview`);
+  const wrap = document.getElementById(`${prefix}-preview-wrap`);
+  if (url && preview && wrap) {
+    preview.src = url;
+    wrap.classList.remove("hidden");
+  } else if (wrap) {
+    wrap.classList.add("hidden");
+    if (preview) preview.src = "";
+  }
+}
+
+function setupFilePreview(fileInputId, previewId, wrapId, hiddenUrlId, removeBtnId) {
+  const fileInput = document.getElementById(fileInputId);
+  const preview = document.getElementById(previewId);
+  const wrap = document.getElementById(wrapId);
+  const hiddenUrl = document.getElementById(hiddenUrlId);
+  const removeBtn = document.getElementById(removeBtnId);
+
+  if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file && preview && wrap) {
+        preview.src = URL.createObjectURL(file);
+        wrap.classList.remove("hidden");
+      }
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.onclick = () => {
+      if (fileInput) fileInput.value = "";
+      if (hiddenUrl) hiddenUrl.value = "";
+      if (wrap) wrap.classList.add("hidden");
+      if (preview) preview.src = "";
+    };
+  }
+}
+
+setupFilePreview("profile-cover-file", "profile-cover-preview", "profile-cover-preview-wrap", "profile-cover-url", "profile-remove-cover-btn");
+setupFilePreview("profile-avatar-file", "profile-avatar-preview", "profile-avatar-preview-wrap", "profile-avatar-url", "profile-remove-avatar-btn");
+setupFilePreview("profile-logo-file", "profile-logo-preview", "profile-logo-preview-wrap", "profile-logo-url", "profile-remove-logo-btn");
+
 const editProfileBtn = document.getElementById("edit-profile-btn");
 if (editProfileBtn) {
   editProfileBtn.onclick = async () => {
     if (profileForm) profileForm.reset();
     if (skillsContainer) skillsContainer.replaceChildren();
     if (socialsContainer) socialsContainer.replaceChildren();
+
+    setPreview("profile-cover", "");
+    setPreview("profile-avatar", "");
+    setPreview("profile-logo", "");
 
     try {
       const docSnap = await getDoc(doc(db, "settings", "profile"));
@@ -148,6 +195,10 @@ if (editProfileBtn) {
         document.getElementById("profile-avatar-url").value = p.avatarUrl || "";
         document.getElementById("profile-cover-url").value = p.coverUrl || "";
         document.getElementById("profile-logo-url").value = p.logoUrl || "";
+
+        setPreview("profile-cover", p.coverUrl || "");
+        setPreview("profile-avatar", p.avatarUrl || "");
+        setPreview("profile-logo", p.logoUrl || "");
 
         if (p.skills && p.skills.length) {
           p.skills.forEach(s => addSkillInput(s));
